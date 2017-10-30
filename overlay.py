@@ -47,7 +47,8 @@ bt_icons = {
 }
 icon_battery_critical_shutdown = iconpath2 + "alert-outline-red.png"
 
-statefile_wifi ="/sys/class/net/wlan0/carrier"
+wifi_carrier = "/sys/class/net/wlan0/carrier" # 1 when wifi connected, 0 when disconnected and/or ifdown
+wifi_linkmode = "/sys/class/net/wlan0/link_mode" # 1 when ifup, 0 when ifdown
 bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
 
@@ -108,13 +109,21 @@ def wifi():
 
   new_wifi_state = InterfaceState.DISABLED
   try:
-    resfile=open(statefile_wifi, "r")
-    state=int(resfile.read().rstrip())
-    resfile.close()
-    if state == 1:
+    f = open(wifi_carrier, "r")
+    carrier_state = int(f.read().rstrip())
+    f.close()
+    if carrier_state == 1:
+      # ifup and connected to AP
       new_wifi_state = InterfaceState.CONNECTED
-    elif state == 0:
-      new_wifi_state = InterfaceState.ENABLED
+    elif carrier_state == 0:
+      f = open(wifi_linkmode, "r")
+      linkmode_state = int(f.read().rstrip())
+      f.close()
+      if linkmode_state == 1:
+        # ifup but not connected to any network
+        new_wifi_state = InterfaceState.ENABLED
+        # else - must be ifdown
+      
   except IOError:
     pass
 
