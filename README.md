@@ -2,9 +2,10 @@
 This repository contains a script to display lovely slightly-transparent overlays on top of your RetroPie games and emulationstation menus
 
 ## What can it do?
-- display battery level (charging, discharging, %, critical)
-- display imminent shutdown warning when battery goes below 3.2V
+- adjust to the current resolution
 - gracefully shut down the Pi after 60s from when voltage goes below 3.2V
+- show a big imminent shutdown warning when the counter starts ticking
+- display battery level (charging, discharging, %, critical)
 - display WiFi state (connected/disconnected/disabled)
 - display Bluetooth state (connected/disconnected/disabled)
 - display under-voltage state
