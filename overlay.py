@@ -28,6 +28,7 @@ pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y"
 iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2="/home/pi/scripts/gbz_overlay/overlay_icons"
 logfile="/home/pi/scripts/gbz_overlay/overlay.log"
+dpi=36
 
 env_icons = {
   "under-voltage": iconpath2+"/flash.png",
@@ -45,14 +46,11 @@ bt_icons = {
   "disabled":  iconpath + "ic_bluetooth_disabled_white_"  + str(dpi) + "dp.png"
 }
 
-
 statefile_wifi ="/sys/class/net/wlan0/carrier"
 bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
 
 fbfile="tvservice -s"
-
-dpi=36
 
 #charging no load: 4.85V max (full bat)
 #charging es load: 4.5V max
