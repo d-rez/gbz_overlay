@@ -4,6 +4,7 @@
 # - ADS1015 with Vbat on A0
 # - pngview
 # - a symbolic link to ic_battery_alert_red_white_36dp.png under material_design_icons_master/device/drawable-mdpi/
+# an entry in crontab
 # - material_design_icons_master github clone
 # - some calibration, there's a lot of jitter
 # - code comments. someday...
