@@ -21,7 +21,7 @@ This repository contains a script to display lovely slightly-transparent overlay
 - some battery readings calibration - check logs
 - some patience
 
-## But how does it look like?
+## But what does it look like?
 Like that:
 
 ![Bluetooth, wifi connected, battery discharging](_images/connected.png)  
