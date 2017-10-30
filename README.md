@@ -40,6 +40,6 @@ CPU throttled due to high temperature
 ![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)  
 Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning - shutting down in 60s
 
-![In-game](_images/ingame.png)
+![In-game](_images/ingame.png)  
 In-game
 
