@@ -26,14 +26,14 @@ pngview_path="/usr/local/bin/pngview"
 pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", "0", "-x"]
 
 iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
-iconpath2="/home/pi/scripts/gbz_overlay/overlay_icons"
-logfile="/home/pi/scripts/gbz_overlay/overlay.log"
+iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
+logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
 dpi=36
 
 env_icons = {
-  "under-voltage": iconpath2+"/flash.png",
-  "freq-capped":   iconpath2+"/thermometer.png",
-  "throttled":     iconpath2+"/thermometer-lines.png"
+  "under-voltage": iconpath2+"flash.png",
+  "freq-capped":   iconpath2+"thermometer.png",
+  "throttled":     iconpath2+"thermometer-lines.png"
 }
 wifi_icons = {
   "connected": iconpath + "ic_network_wifi_white_"      + str(dpi) + "dp.png",
@@ -45,6 +45,7 @@ bt_icons = {
   "connected": iconpath + "ic_bluetooth_connected_white_" + str(dpi) + "dp.png",
   "disabled":  iconpath + "ic_bluetooth_disabled_white_"  + str(dpi) + "dp.png"
 }
+icon_battery_critical_shutdown = iconpath2 + "alert-outline-red.png"
 
 statefile_wifi ="/sys/class/net/wlan0/carrier"
 bt_devices_dir="/sys/class/bluetooth"
@@ -91,7 +92,6 @@ adc = Adafruit_ADS1x15.ADS1015()
 
 def translate_bat(voltage):
   # Figure out how 'wide' each range is
-
   state = voltage <= vmax["discharging"] and "discharging" or "charging"
 
   leftSpan = vmax[state] - vmin[state]
@@ -188,7 +188,6 @@ def battery():
   value_v = value * 0.003
 
   battery_history.append(value_v)
-
   try:
     level_icon=translate_bat(median(battery_history))
   except IndexError:
@@ -197,9 +196,9 @@ def battery():
 
   if value_v <= 3.2:
     my_logger.warn("Battery voltage at or below 3.2V. Initiating shutdown within 1 minute")
-    icon_ba=iconpath2+"/alert-outline-red.png"
-    subprocess.Popen([pngview, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) / 2 - 64), "-y", str(int(resolution[1]) / 2 - 64), icon_ba])
-    os.system("sleep 60 && sudo poweroff")
+
+    subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 64), "-y", str(int(resolution[1]) / 2 - 64), icon_battery_critical_shutdown])
+    os.system("sleep 60 && sudo poweroff &")
 
   if level_icon != battery_level:
     if "bat" in overlay_processes:
