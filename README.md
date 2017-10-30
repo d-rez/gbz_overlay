@@ -24,17 +24,17 @@ This repository contains a script to display lovely slightly-transparent overlay
 ## But how does it look like?
 Like that:
 
-![Bluetooth, wifi connected, battery discharging](_images/connected.png)
+![Bluetooth, wifi connected, battery discharging](_images/connected.png)  
 Bluetooth, wifi connected, battery discharging
 
-![Bluetooth, wifi disconnected, battery discharging](_images/disconnected.png)
+![Bluetooth, wifi disconnected, battery discharging](_images/disconnected.png)  
 Bluetooth, wifi disconnected, battery discharging
 
-![Bluetooth, wifi disabled, battery charging](_images/disabled_charging.png)
+![Bluetooth, wifi disabled, battery charging](_images/disabled_charging.png)  
 Bluetooth, wifi disabled, battery charging
 
-![CPU throttled due to high temperature](_images/throttle.png)
+![CPU throttled due to high temperature](_images/throttle.png)  
 CPU throttled due to high temperature
 
-![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)
+![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)  
 Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning - shutting down in 60s
