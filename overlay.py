@@ -22,14 +22,35 @@ from statistics import median
 from collections import deque
 from enum import Enum
 
+# Set up logging
+logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
+my_logger = logging.getLogger('MyLogger')
+my_logger.setLevel(logging.INFO)
+handler = logging.handlers.RotatingFileHandler(logfile, maxBytes=102400, backupCount=1)
+my_logger.addHandler(handler)
+console = logging.StreamHandler()
+my_logger.addHandler(console)
 
 
+fbfile="tvservice -s"
 
+# Get Framebuffer resolution
+resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(fbfile.split()).decode().rstrip()).group().split('x')
+my_logger.info(resolution)
 
+# Setup icons
 iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
-logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
-icon_size=18
+icon_size=36
+if int(resolution[1]) < 300:
+  icon_size=18
+
+pngview_path="/usr/local/bin/pngview"
+pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - icon_size), "-y"]
+
+
+
+
 
 env_icons = {
   "under-voltage": iconpath2+"flash.png",
@@ -52,8 +73,6 @@ wifi_carrier = "/sys/class/net/wlan0/carrier" # 1 when wifi connected, 0 when di
 wifi_linkmode = "/sys/class/net/wlan0/link_mode" # 1 when ifup, 0 when ifdown
 bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
-
-fbfile="tvservice -s"
 
 #charging no load: 4.85V max (full bat)
 #charging es load: 4.5V max
@@ -227,20 +246,9 @@ battery_level = None
 env = None
 battery_history = deque(maxlen=5)
 
-# Set up logging
-my_logger = logging.getLogger('MyLogger')
-my_logger.setLevel(logging.INFO)
-handler = logging.handlers.RotatingFileHandler(logfile, maxBytes=102400, backupCount=1)
-my_logger.addHandler(handler)
-console = logging.StreamHandler()
-my_logger.addHandler(console)
 
-# Get Framebuffer resolution
-resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(fbfile.split()).decode().rstrip()).group().split('x')
-my_logger.info(resolution)
 
-pngview_path="/usr/local/bin/pngview"
-pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - icon_size), "-y"]
+
 
 while True:
   (battery_level, value_v) = battery()
