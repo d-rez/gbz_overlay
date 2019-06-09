@@ -29,7 +29,7 @@ from enum import Enum
 iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
 logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
-dpi=18
+icon_size=18
 
 env_icons = {
   "under-voltage": iconpath2+"flash.png",
@@ -37,14 +37,14 @@ env_icons = {
   "throttled":     iconpath2+"thermometer-lines.png"
 }
 wifi_icons = {
-  "connected": iconpath + "ic_network_wifi_white_"      + str(dpi) + "dp.png",
-  "disabled":  iconpath + "ic_signal_wifi_off_white_"   + str(dpi) + "dp.png",
-  "enabled":   iconpath + "ic_signal_wifi_0_bar_white_" + str(dpi) + "dp.png"
+  "connected": iconpath + "ic_network_wifi_white_"      + str(icon_size) + "dp.png",
+  "disabled":  iconpath + "ic_signal_wifi_off_white_"   + str(icon_size) + "dp.png",
+  "enabled":   iconpath + "ic_signal_wifi_0_bar_white_" + str(icon_size) + "dp.png"
 }
 bt_icons = {
-  "enabled":   iconpath + "ic_bluetooth_white_"           + str(dpi) + "dp.png",
-  "connected": iconpath + "ic_bluetooth_connected_white_" + str(dpi) + "dp.png",
-  "disabled":  iconpath + "ic_bluetooth_disabled_white_"  + str(dpi) + "dp.png"
+  "enabled":   iconpath + "ic_bluetooth_white_"           + str(icon_size) + "dp.png",
+  "connected": iconpath + "ic_bluetooth_connected_white_" + str(icon_size) + "dp.png",
+  "disabled":  iconpath + "ic_bluetooth_disabled_white_"  + str(icon_size) + "dp.png"
 }
 icon_battery_critical_shutdown = iconpath2 + "alert-outline-red.png"
 
@@ -134,11 +134,11 @@ def wifi():
       del overlay_processes["wifi"]
 
     if new_wifi_state == InterfaceState.ENABLED:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(dpi), wifi_icons["enabled"]])
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(icon_size), wifi_icons["enabled"]])
     elif new_wifi_state == InterfaceState.DISABLED:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(dpi), wifi_icons["disabled"]])
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(icon_size), wifi_icons["disabled"]])
     elif new_wifi_state == InterfaceState.CONNECTED:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(dpi), wifi_icons["connected"]])
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(icon_size), wifi_icons["connected"]])
   return new_wifi_state
 
 def bluetooth():
@@ -167,11 +167,11 @@ def bluetooth():
       del overlay_processes["bt"]
 
     if new_bt_state == InterfaceState.CONNECTED:
-      overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(dpi * 2), bt_icons["connected"]])
+      overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(icon_size * 2), bt_icons["connected"]])
     elif new_bt_state == InterfaceState.ENABLED:
-      overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(dpi * 2), bt_icons["enabled"]])
+      overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(icon_size * 2), bt_icons["enabled"]])
     elif new_bt_state == InterfaceState.DISABLED:
-      overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(dpi * 2), bt_icons["disabled"]])
+      overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(icon_size * 2), bt_icons["disabled"]])
   return new_bt_state
 
 def environment():
@@ -185,7 +185,7 @@ def environment():
   }
   for k,v in env.items():
     if v and not k in overlay_processes:
-      overlay_processes[k] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - dpi * (len(overlay_processes)+1)), env_icons[k]])
+      overlay_processes[k] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), env_icons[k]])
     elif not v and k in overlay_processes:
       overlay_processes[k].kill()
       del(overlay_processes[k])
@@ -216,7 +216,7 @@ def battery():
       overlay_processes["bat"].kill()
       del overlay_processes["bat"]
 
-    icon='ic_battery_' + level_icon + "_white_" + str(dpi) + "dp.png"
+    icon='ic_battery_' + level_icon + "_white_" + str(icon_size) + "dp.png"
     overlay_processes["bat"] = subprocess.Popen(pngview_call + [ "0", iconpath + icon])
   return (level_icon, value_v)
 
@@ -240,7 +240,7 @@ resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(fbfile.split()).
 my_logger.info(resolution)
 
 pngview_path="/usr/local/bin/pngview"
-pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - dpi), "-y"]
+pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - icon_size), "-y"]
 
 while True:
   (battery_level, value_v) = battery()
