@@ -35,7 +35,7 @@ In-game
 
 # Manual Install Instructions
 
-SSH into your device, or access the termail using F4.
+SSH into your device, or access the terminal using F4.
 
 ## Install pngview by AndrewFromMelbourne
     mkdir ~/src
