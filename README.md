@@ -62,7 +62,7 @@ You should see the overlay added to your interface
 
 Now to get it to  run at boot:
 
-    sudo crontab-e
+    sudo crontab -e
     
 At the bottom of the file, add the line:
 
