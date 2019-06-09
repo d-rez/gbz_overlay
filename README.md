@@ -47,7 +47,7 @@ In-game
 
 SSH into your device, or access the termail using F4.
 
-#Install pngview by AndrewFromMelbourne
+# Install pngview by AndrewFromMelbourne
     mkdir ~/src
     cd ~/src
     git clone https://github.com/AndrewFromMelbourne/raspidmx.git
@@ -57,14 +57,16 @@ SSH into your device, or access the termail using F4.
     sudo cp pngview/pngview /usr/local/bin/
 
 # Download Material Design Icons by Google
-	cd ~/src
+    cd ~/src
     git clone http://github.com/google/material-design-icons/ material-design-icons-master
 	
 # Run GBZ Overlay
 Download the code:
+
     cd ~/src
     git clone http://github.com/bverc/gbz_overlay
 Test the code:
+
     python3 gbz_overlay/overlay.py
 You should see the overlay added to your interface
 
