@@ -33,11 +33,11 @@ Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown i
 ![In-game](_images/ingame.png)  
 In-game
 
-## Manual Install Instructions
+# Manual Install Instructions
 
 SSH into your device, or access the termail using F4.
 
-# Install pngview by AndrewFromMelbourne
+## Install pngview by AndrewFromMelbourne
     mkdir ~/src
     cd ~/src
     git clone https://github.com/AndrewFromMelbourne/raspidmx.git
@@ -46,11 +46,11 @@ SSH into your device, or access the termail using F4.
     sudo cp lib/libraspidmx.so.1 /usr/lib/
     sudo cp pngview/pngview /usr/local/bin/
 
-# Download Material Design Icons by Google
+## Download Material Design Icons by Google
     cd ~/src
     git clone http://github.com/google/material-design-icons/ material-design-icons-master
 	
-# Run GBZ Overlay
+## Run GBZ Overlay
 Download the code:
 
     cd ~/src
