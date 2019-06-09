@@ -11,7 +11,7 @@
 # - code comments. someday...
 
 import time
-import Adafruit_ADS1x15
+#import Adafruit_ADS1x15
 import subprocess
 import os
 import re
@@ -80,7 +80,7 @@ class InterfaceState(Enum):
 # 3.2V => will die in 10 mins under load, shut down
 # 3.3V => warning icon?
 
-adc = Adafruit_ADS1x15.ADS1015()
+#adc = Adafruit_ADS1x15.ADS1015()
 # Choose a gain of 1 for reading voltages from 0 to 4.09V.
 # Or pick a different gain to change the range of voltages that are read:
 #  - 2/3 = +/-6.144V
@@ -193,8 +193,9 @@ def environment():
 
 def battery():
   global battery_level, overlay_processes, battery_history
-  value = adc.read_adc(0, gain=2/3)
-  value_v = value * 0.003
+  #value = adc.read_adc(0, gain=2/3)
+  #value_v = value * 0.003
+  value_v = 3.7
 
   battery_history.append(value_v)
   try:
