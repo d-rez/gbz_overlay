@@ -17,6 +17,7 @@ import os
 import re
 import logging
 import logging.handlers
+import psutil
 from datetime import datetime
 from statistics import median
 from collections import deque
@@ -242,18 +243,31 @@ def battery():
     overlay_processes["bat"] = subprocess.Popen(pngview_call + [ "0", bat_iconpath])
   return (level_icon, value_v)
 
+
+
+def checkProcess(process):
+  #Iterate over the all the running process
+  for proc in psutil.process_iter():
+    try:
+      # Check if process name contains the given name string.
+      if processName.lower() in proc.name().lower():
+        return True
+    except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
+      pass
+  return False;
+
 overlay_processes = {}
 wifi_state = None
 bt_state = None
 battery_level = None
 env = None
+ingame = None
 battery_history = deque(maxlen=5)
 
 
-
-
-
 while True:
+  # Check if retroarch is running
+  ingame = checkProcess('retroarch'):
   (battery_level, value_v) = battery()
   wifi_state = wifi()
   bt_state = bluetooth()
@@ -268,3 +282,4 @@ while True:
     env
   ))
   time.sleep(20)
+  
