@@ -12,16 +12,6 @@ This repository contains a script to display lovely slightly-transparent overlay
 - display warning if frequency-capped
 - display warning if throttling
 
-## What do I need to get it running?
-- [pngview](https://github.com/AndrewFromMelbourne/raspidmx/tree/master/pngview) from AndrewFromMelbourne
-- [material-design-icons](https://github.com/google/material-design-icons/archive/master.zip) from Google
-- Adafruit ADS1015 with Vbat on A0 (or alternative)
-- a symbolic link to *overlay\_icons/ic\_battery\_alert\_red\_white\_36dp.png* under *material\_design\_icons\_master/device/drawable-mdpi/*
-- an entry in crontab to start this on boot
-- check and adjust paths in the script header
-- some battery readings calibration - check logs
-- some patience
-
 ## But what does it look like?
 Like that:
 
@@ -43,11 +33,11 @@ Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown i
 ![In-game](_images/ingame.png)  
 In-game
 
-## Manual Install Instructions
+# Manual Install Instructions
 
-SSH into your device, or access the termail using F4.
+SSH into your device, or access the terminal using F4.
 
-# Install pngview by AndrewFromMelbourne
+## Install pngview by AndrewFromMelbourne
     mkdir ~/src
     cd ~/src
     git clone https://github.com/AndrewFromMelbourne/raspidmx.git
@@ -56,11 +46,11 @@ SSH into your device, or access the termail using F4.
     sudo cp lib/libraspidmx.so.1 /usr/lib/
     sudo cp pngview/pngview /usr/local/bin/
 
-# Download Material Design Icons by Google
+## Download Material Design Icons by Google
     cd ~/src
     git clone http://github.com/google/material-design-icons/ material-design-icons-master
 	
-# Run GBZ Overlay
+## Run GBZ Overlay
 Download the code:
 
     cd ~/src
@@ -70,7 +60,14 @@ Test the code:
     python3 gbz_overlay/overlay.py
 You should see the overlay added to your interface
 
-Now to get it to  run at boot
+Now to get it to  run at boot:
 
+    sudo crontab -e
+    
+At the bottom of the file, add the line:
+
+    @reboot python3 /home/pi/src/gbz_overlay/overlay.py
+
+reboot
 
 
