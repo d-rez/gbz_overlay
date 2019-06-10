@@ -56,10 +56,10 @@ SSH into your device, or access the terminal using F4.
 Download the code:
 
     cd ~/src
-    git clone http://github.com/bverc/gbz_overlay
+    git clone http://github.com/bverc/retropie_status_overlay
 Test the code:
 
-    python3 gbz_overlay/overlay.py
+    python3 retropie_status_overlay/overlay.py
 You should see the overlay added to your interface
 
 Now to get it to  run at boot:
@@ -68,7 +68,7 @@ Now to get it to  run at boot:
     
 At the bottom of the file, add the line:
 
-    @reboot python3 /home/pi/src/gbz_overlay/overlay.py
+    @reboot python3 /home/pi/src/retropie_status_overlay/overlay.py
 
 reboot
 
