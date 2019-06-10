@@ -43,7 +43,7 @@ iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
 icon_size=36
 if int(resolution[1]) < 300:
-  icon_size=18
+  icon_size=24
 
 pngview_path="/usr/local/bin/pngview"
 pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - icon_size), "-y"]
@@ -53,9 +53,9 @@ pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x"
 
 
 env_icons = {
-  "under-voltage": iconpath2+"flash.png",
-  "freq-capped":   iconpath2+"thermometer.png",
-  "throttled":     iconpath2+"thermometer-lines.png"
+  "under-voltage": iconpath2 + "flash_" + str(icon_size) + ".png",
+  "freq-capped":   iconpath2 + "thermometer_" + str(icon_size) + ".png",
+  "throttled":     iconpath2 + "thermometer-lines_" + str(icon_size) + ".png"
 }
 wifi_icons = {
   "connected": iconpath + "ic_network_wifi_white_"      + str(icon_size) + "dp.png",
@@ -234,9 +234,12 @@ def battery():
     if "bat" in overlay_processes:
       overlay_processes["bat"].kill()
       del overlay_processes["bat"]
-
-    icon='ic_battery_' + level_icon + "_white_" + str(icon_size) + "dp.png"
-    overlay_processes["bat"] = subprocess.Popen(pngview_call + [ "0", iconpath + icon])
+    
+    bat_iconpath = iconpath + "ic_battery_" + level_icon + "_white_" + str(icon_size) + "dp.png"
+    if (level_icon == "alert_red"):
+      bat_iconpath = iconpath2 + "battery-alert_" + str(icon_size) + ".png"
+          
+    overlay_processes["bat"] = subprocess.Popen(pngview_call + [ "0", bat_iconpath])
   return (level_icon, value_v)
 
 overlay_processes = {}
