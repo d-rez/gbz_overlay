@@ -3,8 +3,7 @@ Based on [gbz_overlay](https://github.com/d-rez/gbz_overlay) script by [d-rez](h
 
 This repository contains a script to display lovely slightly-transparent overlays on top of your RetroPie games and emulationstation menus
 
-![Bluetooth, wifi connected, battery discharging](_images/connected.png)  
-Bluetooth, wifi connected, battery discharging
+![Bluetooth, wifi connected, battery discharging](_images/connected.png)
 
 ## Features
 - display battery level (Requires appropiate Hardware)
