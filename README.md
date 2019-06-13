@@ -3,37 +3,30 @@ Based on [gbz_overlay](https://github.com/d-rez/gbz_overlay) script by [d-rez](h
 
 This repository contains a script to display lovely slightly-transparent overlays on top of your RetroPie games and emulationstation menus
 
-## What can it do?
-- adjust to the current resolution
-- gracefully shut down the Pi after 60s from when voltage goes below 3.2V
-- show a big imminent shutdown warning when the counter starts ticking
-- display battery level (charging, discharging, %, critical)
+![Bluetooth, wifi connected, battery discharging](_images/connected.png)  
+Bluetooth, wifi connected, battery discharging
+
+## Features
+- display battery level (Requires appropiate Hardware)
 - display WiFi state (connected/disconnected/disabled)
 - display Bluetooth state (connected/disconnected/disabled)
 - display under-voltage state
 - display warning if frequency-capped
 - display warning if throttling
+- gracefully shut down the Pi after 60s from when voltage goes below 3.2V
+- show a big imminent shutdown warning when the counter starts ticking
+- Only critical icons displayed in game
 
-## But what does it look like?
-Like that:
-
+## Screenshots
 ![Bluetooth, wifi connected, battery discharging](_images/connected.png)  
-Bluetooth, wifi connected, battery discharging
 
 ![Bluetooth, wifi disconnected, battery discharging](_images/disconnected.png)  
-Bluetooth, wifi disconnected, battery discharging
 
 ![Bluetooth, wifi disabled, battery charging](_images/disabled_charging.png)  
-Bluetooth, wifi disabled, battery charging
 
 ![CPU throttled due to high temperature](_images/throttle.png)  
-CPU throttled due to high temperature
 
-![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)  
-Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning - shutting down in 60s
-
-![In-game](_images/ingame.png)  
-In-game
+![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)
 
 # Manual Install Instructions
 
