@@ -48,7 +48,7 @@ iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
 
 pngview_path="/usr/local/bin/pngview"
-pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - icon_size), "-y"]
+pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", "0", "-x"]
 
 
 env_icons = {
@@ -156,11 +156,11 @@ def wifi(new_ingame):
     
     if not new_ingame:    
       if new_wifi_state == InterfaceState.ENABLED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(icon_size), wifi_icons["enabled"]])
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), wifi_icons["enabled"]])
       elif new_wifi_state == InterfaceState.DISABLED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(icon_size), wifi_icons["disabled"]])
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), wifi_icons["disabled"]])
       elif new_wifi_state == InterfaceState.CONNECTED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(icon_size), wifi_icons["connected"]])
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), wifi_icons["connected"]])
   return new_wifi_state
 
 def bluetooth(new_ingame):
@@ -190,11 +190,11 @@ def bluetooth(new_ingame):
 
     if not new_ingame:
       if new_bt_state == InterfaceState.CONNECTED:
-        overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(icon_size * 2), bt_icons["connected"]])
+        overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), bt_icons["connected"]])
       elif new_bt_state == InterfaceState.ENABLED:
-        overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(icon_size * 2), bt_icons["enabled"]])
+        overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), bt_icons["enabled"]])
       elif new_bt_state == InterfaceState.DISABLED:
-        overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(icon_size * 2), bt_icons["disabled"]])
+        overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * (len(overlay_processes)+1)), bt_icons["disabled"]])
   return new_bt_state
 
 def environment():
