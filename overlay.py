@@ -1,17 +1,11 @@
 #!/usr/bin/python3
 # @ made by d-rez / dark_skeleton
 # Requires:
-# - ADS1015 with Vbat on A0
 # - pngview
-# - a symbolic link to ic_battery_alert_red_white_36dp.png under
-#   material_design_icons_master/device/drawable-mdpi/
 # - an entry in crontab
 # - material_design_icons_master github clone
-# - some calibration, there's a lot of jitter
-# - code comments. someday...
 
 import time
-#import Adafruit_ADS1x15
 import subprocess
 import os
 import re
@@ -22,6 +16,16 @@ from datetime import datetime
 from statistics import median
 from collections import deque
 from enum import Enum
+
+# Settings
+# TODO: Move to external file
+
+# Icon Pixel Size. 24 recommended for screens smaller than 300px high.
+icon_size=24
+
+# 0: None; 1: Adafruit ADS1015i/ADS1115;
+battery_monitor=0
+
 
 # Set up logging
 logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
@@ -42,15 +46,9 @@ my_logger.info(resolution)
 # Setup icons
 iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
-icon_size=36
-if int(resolution[1]) < 300:
-  icon_size=24
 
 pngview_path="/usr/local/bin/pngview"
 pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-x", str(int(resolution[0]) - icon_size), "-y"]
-
-
-
 
 
 env_icons = {
@@ -75,42 +73,45 @@ wifi_linkmode = "/sys/class/net/wlan0/link_mode" # 1 when ifup, 0 when ifdown
 bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
 
-#charging no load: 4.85V max (full bat)
-#charging es load: 4.5V max
 
-vmax = {"discharging": 3.95,
-        "charging"   : 4.5 }
-vmin = {"discharging": 3.2,
-        "charging"   : 4.25 }
-icons = { "discharging": [ "alert_red", "alert", "20", "30", "30", "50", "60",
-                           "60", "80", "90", "full", "full" ],
-          "charging"   : [ "charging_20", "charging_20", "charging_20",
-                           "charging_30", "charging_30", "charging_50",
-                           "charging_60", "charging_60", "charging_80",
-                           "charging_90", "charging_full", "charging_full" ]}
+if battery_monitor == 1:
+  import Adafruit_ADS1x15
+  adc = Adafruit_ADS1x15.ADS1015()
+  # Choose a gain of 1 for reading voltages from 0 to 4.09V.
+  # Or pick a different gain to change the range of voltages that are read:
+  #  - 2/3 = +/-6.144V
+  #  -   1 = +/-4.096V
+  #  -   2 = +/-2.048V
+  #  -   4 = +/-1.024V
+  #  -   8 = +/-0.512V
+  #  -  16 = +/-0.256V
+  # See table 3 in the ADS1015i/ADS1115 datasheet for more info on gain.
+
+  #charging no load: 4.85V max (full bat)
+  #charging es load: 4.5V max
+
+  vmax = {"discharging": 3.95,
+          "charging"   : 4.5 }
+  vmin = {"discharging": 3.2,
+          "charging"   : 4.25 }
+  icons = { "discharging": [ "alert_red", "alert", "20", "30", "30", "50", "60",
+                             "60", "80", "90", "full", "full" ],
+            "charging"   : [ "charging_20", "charging_20", "charging_20",
+                             "charging_30", "charging_30", "charging_50",
+                             "charging_60", "charging_60", "charging_80",
+                             "charging_90", "charging_full", "charging_full" ]}
+                             
+  # From my tests:
+  # over 4V => charging
+  # 4.7V => charging and charged 100%
+  # 3.9V => not charging, 100%
+  # 3.2V => will die in 10 mins under load, shut down
+  # 3.3V => warning icon?
 
 class InterfaceState(Enum):
   DISABLED = 0
   ENABLED = 1
   CONNECTED = 2
-
-# From my tests:
-# over 4V => charging
-# 4.7V => charging and charged 100%
-# 3.9V => not charging, 100%
-# 3.2V => will die in 10 mins under load, shut down
-# 3.3V => warning icon?
-
-#adc = Adafruit_ADS1x15.ADS1015()
-# Choose a gain of 1 for reading voltages from 0 to 4.09V.
-# Or pick a different gain to change the range of voltages that are read:
-#  - 2/3 = +/-6.144V
-#  -   1 = +/-4.096V
-#  -   2 = +/-2.048V
-#  -   4 = +/-1.024V
-#  -   8 = +/-0.512V
-#  -  16 = +/-0.256V
-# See table 3 in the ADS1015i/ADS1115 datasheet for more info on gain.
 
 def translate_bat(voltage):
   # Figure out how 'wide' each range is
@@ -216,9 +217,8 @@ def environment():
 
 def battery(new_ingame):
   global battery_level, overlay_processes, battery_history
-  #value = adc.read_adc(0, gain=2/3)
-  #value_v = value * 0.003
-  value_v = 3.7
+  value = adc.read_adc(0, gain=2/3)
+  value_v = value * 0.003
 
   battery_history.append(value_v)
   try:
@@ -247,7 +247,7 @@ def battery(new_ingame):
 
 
 
-def checkProcess(process):
+def check_process(process):
   #Iterate over the all the running process
   for proc in psutil.process_iter():
     try:
@@ -264,25 +264,35 @@ bt_state = None
 battery_level = None
 env = None
 ingame = None
+value_v = None
 battery_history = deque(maxlen=5)
 
 
 while True:
   # Check if retroarch is running
-  new_ingame = checkProcess('retroarch')
-  (battery_level, value_v) = battery(new_ingame)
+  new_ingame = check_process('retroarch')
   wifi_state = wifi(new_ingame)
   bt_state = bluetooth(new_ingame)
   env = environment()
+  if battery_monitor > 0:
+    (battery_level, value_v) = battery(new_ingame)
+    my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s,bt: %s, throttle: %#0x" % (
+      datetime.now(),
+      value_v,
+      list(battery_history),
+      battery_level,
+      wifi_state.name,
+      bt_state.name,
+      env
+    ))
+  else:
+    my_logger.info("%s,wifi: %s,bt: %s, throttle: %#0x" % (
+      datetime.now(),
+      wifi_state.name,
+      bt_state.name,
+      env
+    ))
+  
   ingame = new_ingame
-  my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s,bt: %s, throttle: %#0x" % (
-    datetime.now(),
-    value_v,
-    list(battery_history),
-    battery_level,
-    wifi_state.name,
-    bt_state.name,
-    env
-  ))
   time.sleep(5)
   
