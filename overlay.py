@@ -274,7 +274,7 @@ while True:
   wifi_state = wifi(new_ingame)
   bt_state = bluetooth(new_ingame)
   env = environment()
-  if battery_monitor > 0:
+  if battery_monitor > 0: # If using battery
     (battery_level, value_v) = battery(new_ingame)
     my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s,bt: %s, throttle: %#0x" % (
       datetime.now(),
@@ -285,13 +285,15 @@ while True:
       bt_state.name,
       env
     ))
-  else:
+  else: # If not using battery
     my_logger.info("%s,wifi: %s,bt: %s, throttle: %#0x" % (
       datetime.now(),
       wifi_state.name,
       bt_state.name,
       env
     ))
+    
+  # TODO: Simplify logging.
   
   ingame = new_ingame
   time.sleep(5)
