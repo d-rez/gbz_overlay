@@ -57,7 +57,11 @@ env_icons = {
   "throttled":     iconpath2 + "thermometer-lines_" + str(icon_size) + ".png"
 }
 wifi_icons = {
-  "connected": iconpath + "ic_network_wifi_white_"      + str(icon_size) + "dp.png",
+  "connected4": iconpath + "ic_signal_wifi_4_bar_white_"      + str(icon_size) + "dp.png",
+  "connected3": iconpath + "ic_signal_wifi_3_bar_white_"      + str(icon_size) + "dp.png",
+  "connected2": iconpath + "ic_signal_wifi_2_bar_white_"      + str(icon_size) + "dp.png",
+  "connected1": iconpath + "ic_signal_wifi_1_bar_white_"      + str(icon_size) + "dp.png",
+  "connected0": iconpath + "ic_signal_wifi_0_bar_white_"      + str(icon_size) + "dp.png",
   "disabled":  iconpath + "ic_signal_wifi_off_white_"   + str(icon_size) + "dp.png",
   "enabled":   iconpath + "ic_signal_wifi_0_bar_white_" + str(icon_size) + "dp.png"
 }
@@ -112,6 +116,10 @@ class InterfaceState(Enum):
   DISABLED = 0
   ENABLED = 1
   CONNECTED = 2
+  CONNECTED_3 = 3
+  CONNECTED_2 = 4
+  CONNECTED_1 = 5
+  CONNECTED_0 = 6
 
 def translate_bat(voltage):
   # Figure out how 'wide' each range is
@@ -143,6 +151,16 @@ def wifi(new_ingame):
         if b'Link Quality' in line:
           x = line.split()[1].split(b"=")[1].split(b"/")
           wifi_quality = int(100*int(x[0])/int(x[1]))
+          if wifi_quality < 20:
+            new_wifi_state = InterfaceState.CONNECTED_0
+          elif wifi_quality < 40:
+            new_wifi_state = InterfaceState.CONNECTED_1
+          elif wifi_quality < 60:
+            new_wifi_state = InterfaceState.CONNECTED_2
+          elif wifi_quality < 80:
+            new_wifi_state = InterfaceState.CONNECTED_3
+          else:
+            new_wifi_state = InterfaceState.CONNECTED
     elif carrier_state == 0:
       f = open(wifi_linkmode, "r")
       linkmode_state = int(f.read().rstrip())
@@ -167,7 +185,15 @@ def wifi(new_ingame):
       elif new_wifi_state == InterfaceState.DISABLED:
         overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["disabled"]])
       elif new_wifi_state == InterfaceState.CONNECTED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected"]])
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected4"]])
+      elif new_wifi_state == InterfaceState.CONNECTED_3:
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected3"]])
+      elif new_wifi_state == InterfaceState.CONNECTED_2:
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected2"]])
+      elif new_wifi_state == InterfaceState.CONNECTED_1:
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected1"]])
+      elif new_wifi_state == InterfaceState.CONNECTED_0:
+        overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected0"]])
   return new_wifi_state
 
 def bluetooth(new_ingame):
