@@ -127,7 +127,7 @@ def translate_bat(voltage):
   return icons[state][int(round(valueScaled * rightSpan))]
 
 def wifi(new_ingame):
-  global wifi_state, ingame, overlay_processes, position
+  global wifi_state, ingame, overlay_processes, position, wifi_quality
 
   new_wifi_state = InterfaceState.DISABLED
   try:
@@ -137,6 +137,12 @@ def wifi(new_ingame):
     if carrier_state == 1:
       # ifup and connected to AP
       new_wifi_state = InterfaceState.CONNECTED
+      # get wifi quality
+      cmd = subprocess.Popen(["iwconfig", "wlan0"], stdout=subprocess.PIPE)
+      for line in cmd.stdout:
+        if b'Link Quality' in line:
+          x = line.split()[1].split(b"=")[1].split(b"/")
+          wifi_quality = int(100*int(x[0])/int(x[1]))
     elif carrier_state == 0:
       f = open(wifi_linkmode, "r")
       linkmode_state = int(f.read().rstrip())
@@ -280,19 +286,21 @@ while True:
   env = environment()
   if battery_monitor > 0: # If using battery
     (battery_level, value_v) = battery(new_ingame)
-    my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s,bt: %s, throttle: %#0x" % (
+    my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s %i%%,bt: %s, throttle: %#0x" % (
       datetime.now(),
       value_v,
       list(battery_history),
       battery_level,
       wifi_state.name,
+      wifi_quality,
       bt_state.name,
       env
     ))
   else: # If not using battery
-    my_logger.info("%s,wifi: %s,bt: %s, throttle: %#0x" % (
+    my_logger.info("%s,wifi: %s %i%%,bt: %s, throttle: %#0x" % (
       datetime.now(),
       wifi_state.name,
+      wifi_quality,
       bt_state.name,
       env
     ))
