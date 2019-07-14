@@ -65,6 +65,10 @@ wifi_icons = {
   "disabled":  iconpath + "ic_signal_wifi_off_white_"   + str(icon_size) + "dp.png",
   "enabled":   iconpath + "ic_signal_wifi_0_bar_white_" + str(icon_size) + "dp.png"
 }
+# If using 24 pixels, use correct unconnected image
+# TODO: Allow for width of 26 pixels
+if icon_size == 24:
+  wifi_icons["enabled"] = iconpath + "ic_signal_wifi_statusbar_not_connected_white_26x24dp.png"
 bt_icons = {
   "enabled":   iconpath + "ic_bluetooth_white_"           + str(icon_size) + "dp.png",
   "connected": iconpath + "ic_bluetooth_connected_white_" + str(icon_size) + "dp.png",
