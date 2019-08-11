@@ -36,7 +36,7 @@ SSH into your device, or access the terminal using F4.
     cd ~/src
     git clone https://github.com/AndrewFromMelbourne/raspidmx.git
     cd raspidmx
-    sudo make
+    make
     sudo cp lib/libraspidmx.so.1 /usr/lib/
     sudo cp pngview/pngview /usr/local/bin/
 
@@ -44,7 +44,7 @@ SSH into your device, or access the terminal using F4.
     cd ~/src
     git clone http://github.com/google/material-design-icons/ material-design-icons-master
 	
-## Run GBZ Overlay
+## Run RetroPie Status Overlay
 Download the code:
 
     cd ~/src
