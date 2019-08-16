@@ -49,6 +49,7 @@ Download the code:
 
     cd ~/src
     git clone http://github.com/bverc/retropie_status_overlay
+    cp retropie_status_overlay/config.ini.example retropie_status_overlay/config.ini
 Test the code:
 
     python3 retropie_status_overlay/overlay.py

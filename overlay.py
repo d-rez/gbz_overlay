@@ -12,20 +12,20 @@ import re
 import logging
 import logging.handlers
 import psutil
+import configparser
 from datetime import datetime
 from statistics import median
 from collections import deque
 from enum import Enum
 
-# Settings
-# TODO: Move to external file
-
-# Icon Pixel Size. 24 recommended for screens smaller than 300px high.
-icon_size=24
-
-# 0: None; 1: Adafruit ADS1015i/ADS1115;
-battery_monitor=0
-
+# Load Configuration
+config = configparser.ConfigParser()
+config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
+icon_size = int(config['Icons']['Size'])
+icon_color = config['Icons']['Color']
+detect_battery = config.getboolean('Detection','Battery')
+detect_wifi = config.getboolean('Detection','Wifi')
+detect_bluetooth = config.getboolean('Detection','Bluetooth')
 
 # Set up logging
 logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
@@ -57,18 +57,18 @@ env_icons = {
   "throttled":     iconpath2 + "thermometer-lines_" + str(icon_size) + ".png"
 }
 wifi_icons = {
-  "connected4": iconpath + "ic_signal_wifi_4_bar_white_"      + str(icon_size) + "dp.png",
-  "connected3": iconpath + "ic_signal_wifi_3_bar_white_"      + str(icon_size) + "dp.png",
-  "connected2": iconpath + "ic_signal_wifi_2_bar_white_"      + str(icon_size) + "dp.png",
-  "connected1": iconpath + "ic_signal_wifi_1_bar_white_"      + str(icon_size) + "dp.png",
-  "connected0": iconpath + "ic_signal_wifi_0_bar_white_"      + str(icon_size) + "dp.png",
-  "disabled":  iconpath + "ic_signal_wifi_off_white_"   + str(icon_size) + "dp.png",
-  "enabled":   iconpath + "ic_signal_wifi_0_bar_white_" + str(icon_size) + "dp.png"
+  "connected4": iconpath + "ic_signal_wifi_4_bar_" + icon_color + "_"      + str(icon_size) + "dp.png",
+  "connected3": iconpath + "ic_signal_wifi_3_bar_" + icon_color + "_"      + str(icon_size) + "dp.png",
+  "connected2": iconpath + "ic_signal_wifi_2_bar_" + icon_color + "_"      + str(icon_size) + "dp.png",
+  "connected1": iconpath + "ic_signal_wifi_1_bar_" + icon_color + "_"      + str(icon_size) + "dp.png",
+  "connected0": iconpath + "ic_signal_wifi_0_bar_" + icon_color + "_"      + str(icon_size) + "dp.png",
+  "disabled":  iconpath + "ic_signal_wifi_off_" + icon_color + "_"   + str(icon_size) + "dp.png",
+  "enabled":   iconpath + "ic_signal_wifi_0_bar_" + icon_color + "_" + str(icon_size) + "dp.png"
 }
 bt_icons = {
-  "enabled":   iconpath + "ic_bluetooth_white_"           + str(icon_size) + "dp.png",
-  "connected": iconpath + "ic_bluetooth_connected_white_" + str(icon_size) + "dp.png",
-  "disabled":  iconpath + "ic_bluetooth_disabled_white_"  + str(icon_size) + "dp.png"
+  "enabled":   iconpath + "ic_bluetooth_" + icon_color + "_"           + str(icon_size) + "dp.png",
+  "connected": iconpath + "ic_bluetooth_connected_" + icon_color + "_" + str(icon_size) + "dp.png",
+  "disabled":  iconpath + "ic_bluetooth_disabled_" + icon_color + "_"  + str(icon_size) + "dp.png"
 }
 icon_battery_critical_shutdown = iconpath2 + "alert-outline-red.png"
 
@@ -78,7 +78,7 @@ bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
 
 
-if battery_monitor == 1:
+if detect_battery:
   import Adafruit_ADS1x15
   adc = Adafruit_ADS1x15.ADS1015()
   # Choose a gain of 1 for reading voltages from 0 to 4.09V.
@@ -273,7 +273,7 @@ def battery(new_ingame):
       overlay_processes["bat"].kill()
       del overlay_processes["bat"]
     
-    bat_iconpath = iconpath + "ic_battery_" + level_icon + "_white_" + str(icon_size) + "dp.png"
+    bat_iconpath = iconpath + "ic_battery_" + level_icon + "_" + icon_color + "_" + str(icon_size) + "dp.png"
     if (level_icon == "alert_red"):
       bat_iconpath = iconpath2 + "battery-alert_" + str(icon_size) + ".png"
     elif not new_ingame:
@@ -310,7 +310,7 @@ while True:
   wifi_state = wifi(new_ingame)
   bt_state = bluetooth(new_ingame)
   env = environment()
-  if battery_monitor > 0: # If using battery
+  if detect_battery: # If using battery
     (battery_level, value_v) = battery(new_ingame)
     my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s %i%%,bt: %s, throttle: %#0x" % (
       datetime.now(),

@@ -1,0 +1,10 @@
+[Icons]
+# Icon Size: 24, 36 or 48
+Size = 24
+# Icon Color: white or black
+Color = white
+
+[Detection]
+Battery = False
+Wifi = True
+Bluetooth = True
