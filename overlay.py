@@ -307,31 +307,25 @@ while True:
   position = 0;
   # Check if retroarch is running
   new_ingame = check_process('retroarch')
-  wifi_state = wifi(new_ingame)
-  bt_state = bluetooth(new_ingame)
-  env = environment()
-  if detect_battery: # If using battery
+  log = str("%s" % (datetime.now()))
+  if detect_battery:
     (battery_level, value_v) = battery(new_ingame)
-    my_logger.info("%s,median: %.2f, %s,icon: %s,wifi: %s %i%%,bt: %s, throttle: %#0x" % (
-      datetime.now(),
+    log = log + str(", median: %.2f, %s,icon: %s" % (
       value_v,
       list(battery_history),
-      battery_level,
-      wifi_state.name,
-      wifi_quality,
-      bt_state.name,
-      env
+      battery_level
     ))
-  else: # If not using battery
-    my_logger.info("%s,wifi: %s %i%%,bt: %s, throttle: %#0x" % (
-      datetime.now(),
+  if detect_wifi:
+    wifi_state = wifi(new_ingame)
+    log = log + str(", wifi: %s %i%%" % (
       wifi_state.name,
-      wifi_quality,
-      bt_state.name,
-      env
+      wifi_quality
     ))
-    
-  # TODO: Simplify logging.
+  if detect_bluetooth:
+    bt_state = bluetooth(new_ingame)
+    log = log + str(", bt: %s" % (bt_state.name))
+  env = environment()
+  my_logger.info(log + str(", throttle: %#0x" % (env)))
   
   ingame = new_ingame
   time.sleep(5)
