@@ -45,6 +45,9 @@ SSH into your device, or access the terminal using F4.
     git clone http://github.com/google/material-design-icons/ material-design-icons-master
 	
 ## Run RetroPie Status Overlay
+Install psutil module:
+
+    sudo apt-get install python3-psutil
 Download the code:
 
     cd ~/src
