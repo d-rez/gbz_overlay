@@ -26,6 +26,7 @@ icon_color = config['Icons']['Color']
 detect_battery = config.getboolean('Detection','Battery')
 detect_wifi = config.getboolean('Detection','Wifi')
 detect_bluetooth = config.getboolean('Detection','Bluetooth')
+detect_audio = config.getboolean('Detection', 'Audio')
 
 # Set up logging
 logfile = os.path.dirname(os.path.realpath(__file__)) + "/overlay.log"
@@ -203,6 +204,47 @@ def wifi(new_ingame):
         overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["connected0"]])
   return new_wifi_state
 
+def audio(new_ingame):
+  global audio_state, ingame, overlay_processes, position, audio_volume
+
+  new_audio_state = InterfaceState.DISABLED
+  try:
+    cmd = subprocess.Popen('amixer', stdout=subprocess.PIPE)
+    for line in cmd.stdout:
+      if b'[' in line:
+        my_logger.info(line)
+        if line.split(b"[")[3].split(b"]")[0] == b"on":
+          audio_volume = int(line.split(b"[")[1].split(b"%")[0])
+          if audio_volume == 0:
+            new_audio_state = InterfaceState.ENABLED
+          elif audio_volume < 50:
+            new_audio_state = InterfaceState.CONNECTED_0
+          else:
+            new_audio_state = InterfaceState.CONNECTED_1
+        break
+    
+  
+  except IOError:
+    pass
+    
+  if new_audio_state != audio_state or new_ingame != ingame:
+    if "audio" in overlay_processes:
+      overlay_processes["audio"].kill()
+      del overlay_processes["audio"]
+    
+    if not new_ingame:
+      position += 1
+      if new_audio_state == InterfaceState.ENABLED:
+        overlay_processes["audio"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), audio_icons["volume0"]])
+      elif new_audio_state == InterfaceState.DISABLED:
+        overlay_processes["audio"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), audio_icons["disabled"]])
+      elif new_audio_state == InterfaceState.CONNECTED_1:
+        overlay_processes["audio"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), audio_icons["volume2"]])
+      elif new_audio_state == InterfaceState.CONNECTED_0:
+        overlay_processes["audio"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), audio_icons["volume1"]])
+  
+  return new_audio_state
+
 def bluetooth(new_ingame):
   global bt_state, overlay_processes, position
 
@@ -303,12 +345,13 @@ def check_process(process):
 overlay_processes = {}
 wifi_state = None
 bt_state = None
+audio_state = None
 battery_level = None
 env = None
 ingame = None
 value_v = None
 battery_history = deque(maxlen=5)
-
+audio_volume = 0
 
 while True:
   position = 0;
@@ -336,6 +379,9 @@ while True:
   if detect_bluetooth:
     bt_state = bluetooth(new_ingame)
     log = log + str(", bt: %s" % (bt_state.name))
+  if detect_audio:
+    audio_state = audio(new_ingame)
+    log = log + str(", Audio: %s %i%%" % (audio_state.name, audio_volume))
   env = environment()
   my_logger.info(log + str(", throttle: %#0x" % (env)))
   
