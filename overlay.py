@@ -46,6 +46,7 @@ my_logger.info(resolution)
 # Setup icons
 iconpath="/home/pi/src/material-design-icons-master/device/drawable-mdpi/"
 iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
+iconpath3="/home/pi/src/material-design-icons-master/av/drawable-mdpi/"
 
 pngview_path="/usr/local/bin/pngview"
 pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", "0", "-x"]
@@ -69,6 +70,12 @@ bt_icons = {
   "enabled":   iconpath + "ic_bluetooth_" + icon_color + "_"           + str(icon_size) + "dp.png",
   "connected": iconpath + "ic_bluetooth_connected_" + icon_color + "_" + str(icon_size) + "dp.png",
   "disabled":  iconpath + "ic_bluetooth_disabled_" + icon_color + "_"  + str(icon_size) + "dp.png"
+}
+audio_icons = {
+  "volume0":   iconpath3 + "ic_volume_mute_" + icon_color + "_"           + str(icon_size) + "dp.png",
+  "volume1":   iconpath3 + "ic_volume_down_" + icon_color + "_" + str(icon_size) + "dp.png",
+  "volume2":   iconpath3 + "ic_volume_up_" + icon_color + "_" + str(icon_size) + "dp.png",
+  "disabled":  iconpath3 + "ic_volume_off_" + icon_color + "_"  + str(icon_size) + "dp.png"
 }
 icon_battery_critical_shutdown = iconpath2 + "alert-outline-red.png"
 

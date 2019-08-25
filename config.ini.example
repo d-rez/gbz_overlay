@@ -8,3 +8,4 @@ Color = white
 Battery = False
 Wifi = True
 Bluetooth = True
+Audio = True
