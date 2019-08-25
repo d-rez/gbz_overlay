@@ -145,6 +145,7 @@ def translate_bat(voltage):
 def wifi(new_ingame):
   global wifi_state, ingame, overlay_processes, position, wifi_quality
 
+  position += 1
   new_wifi_state = InterfaceState.DISABLED
   try:
     f = open(wifi_carrier, "r")
@@ -187,7 +188,6 @@ def wifi(new_ingame):
       del overlay_processes["wifi"]
     
     if not new_ingame:
-      position += 1
       if new_wifi_state == InterfaceState.ENABLED:
         overlay_processes["wifi"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), wifi_icons["enabled"]])
       elif new_wifi_state == InterfaceState.DISABLED:
@@ -207,6 +207,7 @@ def wifi(new_ingame):
 def audio(new_ingame):
   global audio_state, ingame, overlay_processes, position, audio_volume
 
+  position += 1
   new_audio_state = InterfaceState.DISABLED
   try:
     cmd = subprocess.Popen('amixer', stdout=subprocess.PIPE)
@@ -222,18 +223,16 @@ def audio(new_ingame):
           else:
             new_audio_state = InterfaceState.CONNECTED_1
         break
-    
-  
+
   except IOError:
     pass
-    
+
   if new_audio_state != audio_state or new_ingame != ingame:
     if "audio" in overlay_processes:
       overlay_processes["audio"].kill()
       del overlay_processes["audio"]
-    
+
     if not new_ingame:
-      position += 1
       if new_audio_state == InterfaceState.ENABLED:
         overlay_processes["audio"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), audio_icons["volume0"]])
       elif new_audio_state == InterfaceState.DISABLED:
@@ -248,6 +247,7 @@ def audio(new_ingame):
 def bluetooth(new_ingame):
   global bt_state, overlay_processes, position
 
+  position += 1
   new_bt_state = InterfaceState.DISABLED
   try:
     p1 = subprocess.Popen('hciconfig', stdout = subprocess.PIPE)
@@ -271,7 +271,6 @@ def bluetooth(new_ingame):
       del overlay_processes["bt"]
 
     if not new_ingame:
-      position += 1
       if new_bt_state == InterfaceState.CONNECTED:
         overlay_processes["bt"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) - icon_size * position), bt_icons["connected"]])
       elif new_bt_state == InterfaceState.ENABLED:
