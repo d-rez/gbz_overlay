@@ -317,10 +317,15 @@ while True:
     ))
   if detect_wifi:
     wifi_state = wifi(new_ingame)
-    log = log + str(", wifi: %s %i%%" % (
-      wifi_state.name,
-      wifi_quality
-    ))
+    if wifi_state == InterfaceState.CONNECTED:
+      log = log + str(", wifi: %s %i%%" % (
+        wifi_state.name,
+        wifi_quality
+      ))
+    else:
+      log = log + str(", wifi: %s" % (
+        wifi_state.name
+      ))
   if detect_bluetooth:
     bt_state = bluetooth(new_ingame)
     log = log + str(", bt: %s" % (bt_state.name))
