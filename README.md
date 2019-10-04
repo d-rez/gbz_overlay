@@ -13,12 +13,13 @@ This repository contains a script to display lovely slightly-transparent overlay
 - show a big imminent shutdown warning when the counter starts ticking
 
 ## What do I need to get it running?
+- See [installation instructions](#installation-instructions) below for setup steps
 - [pngview](https://github.com/AndrewFromMelbourne/raspidmx/tree/master/pngview) from AndrewFromMelbourne
 - [material-design-icons](https://github.com/google/material-design-icons/archive/master.zip) from Google
 - Adafruit ADS1015 with Vbat on A0 (or alternative)
 - a symbolic link to *overlay\_icons/ic\_battery\_alert\_red\_white\_36dp.png* under *material\_design\_icons\_master/device/drawable-mdpi/*
 - an entry in crontab to start this on boot
-- check and adjust paths in the script header
+- check and adjust paths in the script header if required
 - some battery readings calibration - check logs
 - some patience
 
@@ -48,18 +49,18 @@ In-game
 
 SSH into your device or access the terminal using F4. We're assuming you already have Internet access configured
 
-### Install pngview by AndrewFromMelbourne
+### 1. Install pngview by AndrewFromMelbourne
     mkdir ~/src && cd ~/src
     git clone --depth 1 https://github.com/AndrewFromMelbourne/raspidmx.git
     cd raspidmx/pngview
     make
     sudo cp pngview /usr/local/bin/
 
-### Download Material Design Icons by Google
+### 2. Download Material Design Icons by Google
     cd ~/src
     git clone --depth 1 https://github.com/google/material-design-icons.git material-design-icons-master
 
-### Download the script and install dependencies:
+### 3. Download the script and install dependencies:
     mkdir ~/scripts && cd ~/scripts
     git clone --depth 1 https://github.com/d-rez/gbz_overlay.git
     ln -s ~/scripts/gbz_overlay/overlay_icons/ic_battery_alert_red_white_36dp.png ~/src/material-design-icons-master/device/drawable-mdpi/ic_battery_alert_red_white_36dp.png
@@ -73,7 +74,7 @@ SSH into your device or access the terminal using F4. We're assuming you already
 
 You should now see overlay icons
 
-### Set up script autostart
+### 4. Set up script autostart
 Note: Do not use rc.local, it's deprecated
 
     sudo crontab -e
@@ -86,4 +87,4 @@ You can use this one-liner instead if you prefer:
 
     (crontab -l ; echo "@reboot python3 /home/pi/scripts/gbz_overlay/overlay.py") | crontab -
 
-### Reboot
+### 5. Reboot
