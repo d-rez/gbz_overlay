@@ -2,15 +2,15 @@
 This repository contains a script to display lovely slightly-transparent overlays on top of your RetroPie games and emulationstation menus
 
 ## What can it do?
-- adjust to the current resolution
-- gracefully shut down the Pi after 60s from when voltage goes below 3.2V
-- show a big imminent shutdown warning when the counter starts ticking
-- display battery level (charging, discharging, %, critical)
+- display battery level (Requires ADS1x15)
 - display WiFi state (connected/disconnected/disabled)
 - display Bluetooth state (connected/disconnected/disabled)
 - display under-voltage state
 - display warning if frequency-capped
 - display warning if throttling
+- adjust icons' position to current display resolution
+- gracefully shut down the Pi after 60s from when voltage goes below 3.2V
+- show a big imminent shutdown warning when the counter starts ticking
 
 ## What do I need to get it running?
 - [pngview](https://github.com/AndrewFromMelbourne/raspidmx/tree/master/pngview) from AndrewFromMelbourne
@@ -43,3 +43,47 @@ Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown i
 ![In-game](_images/ingame.png)  
 In-game
 
+
+## Installation Instructions
+
+SSH into your device or access the terminal using F4. We're assuming you already have Internet access configured
+
+### Install pngview by AndrewFromMelbourne
+    mkdir ~/src && cd ~/src
+    git clone --depth 1 https://github.com/AndrewFromMelbourne/raspidmx.git
+    cd raspidmx/pngview
+    make
+    sudo cp pngview /usr/local/bin/
+
+### Download Material Design Icons by Google
+    cd ~/src
+    git clone --depth 1 https://github.com/google/material-design-icons.git material-design-icons-master
+
+### Download the script and install dependencies:
+    mkdir ~/scripts && cd ~/scripts
+    git clone --depth 1 https://github.com/d-rez/gbz_overlay.git
+    ln -s ~/scripts/gbz_overlay/overlay_icons/ic_battery_alert_red_white_36dp.png ~/src/material-design-icons-master/device/drawable-mdpi/ic_battery_alert_red_white_36dp.png
+    sudo apt-get update
+    sudo apt-get install build-essential python3-dev python3-smbus python3-pip
+    sudo pip3 install adafruit-ads1x15
+
+#### Test the script:
+
+    python3 ~/scripts/gbz_overlay/overlay.py &
+
+You should now see overlay icons
+
+### Set up script autostart
+Note: Do not use rc.local, it's deprecated
+
+    sudo crontab -e
+
+Then at the bottom of the file, add the line:
+
+    @reboot python3 /home/pi/scripts/gbz_overlay/overlay.py
+
+You can use this one-liner instead if you prefer:
+
+    (crontab -l ; echo "@reboot python3 /home/pi/scripts/gbz_overlay/overlay.py") | crontab -
+
+### Reboot
