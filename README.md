@@ -35,10 +35,11 @@ SSH into your device, or access the terminal using F4.
     mkdir ~/src
     cd ~/src
     git clone https://github.com/AndrewFromMelbourne/raspidmx.git
-    cd raspidmx
+    cd raspidmx/lib
     make
-    sudo cp lib/libraspidmx.so.1 /usr/lib/
-    sudo cp pngview/pngview /usr/local/bin/
+    cd ../pngview
+    make
+    sudo cp pngview /usr/local/bin/
 
 ## Download Material Design Icons by Google
     cd ~/src
