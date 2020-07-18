@@ -7,10 +7,15 @@ Color = white
 [Detection]
 BatteryADC = False
 BatteryLDO = False
+ShutdownGPIO = False
 Wifi = True
 Bluetooth = True
 Audio = True
 
 [BatteryLDO]
 GPIO = 27
+ActiveLow = True
+
+[ShutdownGPIO]
+GPIO = 3
 ActiveLow = True

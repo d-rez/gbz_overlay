@@ -340,10 +340,19 @@ def check_process(process):
   
   
 def interrupt_shutdown(channel):
-  if config.getboolean('BatteryLDO','ActiveLow'):
-    shutdown(not GPIO.input(int(config['BatteryLDO']['GPIO'])))
-  else:
-    shutdown(GPIO.input(int(config['BatteryLDO']['GPIO'])))
+  if channel == int(config['BatteryLDO']['GPIO']):
+    if GPIO.input(channel) != config.getboolean('BatteryLDO','ActiveLow'):
+      shutdown(True)
+    else:
+      shutdown(False)
+  elif channel == int(config['ShutdownGPIO']['GPIO']):
+    if GPIO.input(channel) != config.getboolean('ShutdownGPIO','ActiveLow'):
+      time.sleep(1)
+      if GPIO.input(channel) != config.getboolean('ShutdownGPIO','ActiveLow'):
+        my_logger.warning("Shutdown button pressed, shutting down now.")
+        os.system("sudo shutdown -P now")
+      else:
+        my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
  
 def shutdown(low_voltage):
   if low_voltage:
@@ -353,8 +362,7 @@ def shutdown(low_voltage):
       del overlay_processes["caution"]
     
     overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 64), "-y", str(int(resolution[1]) / 2 - 64), icon_battery_critical_shutdown])
-    os.system("sudo shutdown +1")
-  
+    os.system("sudo shutdown -P +1")
   else:
     os.system("sudo shutdown -c")
     overlay_processes["caution"].kill()
@@ -365,6 +373,11 @@ if config.getboolean('Detection','BatteryLDO'):
   my_logger.info("LDO Active on GPIO %s", config['BatteryLDO']['GPIO'])
   GPIO.setup(int(config['BatteryLDO']['GPIO']), GPIO.IN, pull_up_down = GPIO.PUD_UP)
   GPIO.add_event_detect(int(config['BatteryLDO']['GPIO']), GPIO.BOTH, callback = interrupt_shutdown, bouncetime = 500)
+
+if config.getboolean('Detection','ShutdownGPIO'):
+  my_logger.info("Shutdown button on GPIO %s", config['ShutdownGPIO']['GPIO'])
+  GPIO.setup(int(config['ShutdownGPIO']['GPIO']), GPIO.IN, pull_up_down = GPIO.PUD_UP)
+  GPIO.add_event_detect(int(config['ShutdownGPIO']['GPIO']), GPIO.BOTH, callback = interrupt_shutdown, bouncetime = 200)
 
 overlay_processes = {}
 wifi_state = None
