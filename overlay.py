@@ -13,6 +13,7 @@ import logging
 import logging.handlers
 import psutil
 import configparser
+import RPi.GPIO as GPIO
 from datetime import datetime
 from statistics import median
 from collections import deque
@@ -23,7 +24,7 @@ config = configparser.ConfigParser()
 config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
 icon_size = int(config['Icons']['Size'])
 icon_color = config['Icons']['Color']
-detect_battery = config.getboolean('Detection','Battery')
+detect_battery = config.getboolean('Detection','BatteryADC')
 detect_wifi = config.getboolean('Detection','Wifi')
 detect_bluetooth = config.getboolean('Detection','Bluetooth')
 detect_audio = config.getboolean('Detection', 'Audio')
@@ -311,10 +312,7 @@ def battery(new_ingame):
 
 
   if value_v <= 3.2:
-    my_logger.warn("Battery voltage at or below 3.2V. Initiating shutdown within 1 minute")
-
-    subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 64), "-y", str(int(resolution[1]) / 2 - 64), icon_battery_critical_shutdown])
-    os.system("sleep 60 && sudo poweroff &")
+    shutdown(True)
 
   if level_icon != battery_level or new_ingame != ingame:
     if "bat" in overlay_processes:
@@ -340,6 +338,34 @@ def check_process(process):
     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
       pass
   return False;
+  
+  
+def interrupt_shutdown(channel):
+  if config.getboolean('BatteryLDO','ActiveLow'):
+    shutdown(not GPIO.input(int(config['BatteryLDO']['GPIO'])))
+  else:
+    shutdown(GPIO.input(int(config['BatteryLDO']['GPIO'])))
+ 
+def shutdown(low_voltage):
+  if low_voltage:
+    my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
+    if "caution" in overlay_processes:
+      overlay_processes["caution"].kill()
+      del overlay_processes["caution"]
+    
+    overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 64), "-y", str(int(resolution[1]) / 2 - 64), icon_battery_critical_shutdown])
+    os.system("sudo shutdown +1")
+  
+  else:
+    os.system("sudo shutdown -c")
+    overlay_processes["caution"].kill()
+    my_logger.info("Power Restored, shutdown aborted.")
+
+GPIO.setmode(GPIO.BCM)
+if config.getboolean('Detection','BatteryLDO'):
+  my_logger.info("LDO Active on GPIO %s", config['BatteryLDO']['GPIO'])
+  GPIO.setup(int(config['BatteryLDO']['GPIO']), GPIO.IN, pull_up_down = GPIO.PUD_UP)
+  GPIO.add_event_detect(int(config['BatteryLDO']['GPIO']), GPIO.BOTH, callback = interrupt_shutdown, bouncetime = 500)
 
 overlay_processes = {}
 wifi_state = None

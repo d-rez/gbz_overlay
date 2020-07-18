@@ -5,7 +5,12 @@ Size = 48
 Color = white
 
 [Detection]
-Battery = False
+BatteryADC = False
+BatteryLDO = False
 Wifi = True
 Bluetooth = True
 Audio = True
+
+[BatteryLDO]
+GPIO = 27
+ActiveLow = True
