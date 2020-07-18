@@ -214,7 +214,6 @@ def audio(new_ingame):
     cmd = subprocess.Popen('amixer', stdout=subprocess.PIPE)
     for line in cmd.stdout:
       if b'[' in line:
-        my_logger.info(line)
         if line.split(b"[")[3].split(b"]")[0] == b"on":
           audio_volume = int(line.split(b"[")[1].split(b"%")[0])
           if audio_volume == 0:
