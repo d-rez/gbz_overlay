@@ -79,7 +79,7 @@ audio_icons = {
   "volume2":   iconpath3 + "ic_volume_up_" + icon_color + "_" + str(icon_size) + "dp.png",
   "disabled":  iconpath3 + "ic_volume_off_" + icon_color + "_"  + str(icon_size) + "dp.png"
 }
-icon_battery_critical_shutdown = iconpath2 + "alert-outline-red.png"
+icon_battery_critical_shutdown = iconpath2 + "battery-alert-128.png"
 
 wifi_carrier = "/sys/class/net/wlan0/carrier" # 1 when wifi connected, 0 when disconnected and/or ifdown
 wifi_linkmode = "/sys/class/net/wlan0/link_mode" # 1 when ifup, 0 when ifdown
