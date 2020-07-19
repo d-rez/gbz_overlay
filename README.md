@@ -3,7 +3,7 @@ Based on [gbz_overlay](https://github.com/d-rez/gbz_overlay) script by [d-rez](h
 
 This repository contains a script to display lovely slightly-transparent overlays on top of your RetroPie games and emulationstation menus
 
-![Bluetooth, wifi connected, battery discharging](_images/connected.png)
+![Bluetooth, wifi connected, audio on](_images/240_icons.png)
 
 ## Features
 - display battery level (Requires appropiate Hardware)
@@ -12,20 +12,16 @@ This repository contains a script to display lovely slightly-transparent overlay
 - display under-voltage state
 - display warning if frequency-capped
 - display warning if throttling
-- gracefully shut down the Pi after 60s from when voltage goes below 3.2V
+- gracefully shut down the Pi after 60s from when voltage goes below 3.2V of low voltage detected (abort shutdown when power is restored)
 - show a big imminent shutdown warning when the counter starts ticking
 - Only critical icons displayed in game
+- Shutdown from button press
 
-## Screenshots
-![Bluetooth, wifi connected, battery discharging](_images/connected.png)  
+## More Screenshots
 
-![Bluetooth, wifi disconnected, battery discharging](_images/disconnected.png)  
+![Battery discharging, frequency capped, low voltage, audio mute, bluetooth, low wifi](_images/240_allicons.png)
 
-![Bluetooth, wifi disabled, battery charging](_images/disabled_charging.png)  
-
-![CPU throttled due to high temperature](_images/throttle.png)  
-
-![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)
+![Battery Critical](_images/240_lowbat.png)
 
 # Automatic Install Instructions
 
