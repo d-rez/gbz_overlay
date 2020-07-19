@@ -27,6 +27,18 @@ This repository contains a script to display lovely slightly-transparent overlay
 
 ![Under-Voltage, Freq-capped due to high temperature, battery critical, shutdown imminent warning](_images/freqcap_undervolt_criticalbat_shutdown.png)
 
+# Automatic Install Instructions
+
+SSH into your device, or access the terminal using F4.
+
+    wget https://raw.githubusercontent.com/bverc/retropie_status_overlay/master/install.sh
+    chmod +x install.sh
+    ./install.sh
+
+Remove install script once complete
+
+    rm install.sh
+
 # Manual Install Instructions
 
 SSH into your device, or access the terminal using F4.

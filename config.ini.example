@@ -1,3 +1,5 @@
+# Created from config.ini.example
+
 [Icons]
 # Icon Size: 24, 36 or 48
 Size = 48
@@ -5,12 +7,12 @@ Size = 48
 Color = white
 
 [Detection]
-BatteryADC = False
-BatteryLDO = False
-ShutdownGPIO = False
 Wifi = True
 Bluetooth = True
 Audio = True
+BatteryADC = False
+BatteryLDO = False
+ShutdownGPIO = False
 
 [BatteryLDO]
 GPIO = 27
