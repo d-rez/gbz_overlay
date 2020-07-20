@@ -5,6 +5,12 @@
 Size = 48
 # Icon Color: white or black
 Color = white
+#Horizontal Position: left or right
+Horizontal = right
+#Vertical Position: top or bottom
+Vertical = bottom
+# Padding from corner and between icons
+Padding = 4
 
 [Detection]
 Wifi = True

@@ -29,7 +29,6 @@ if [[ $CONFIG = [bB] ]] ; then
   done
   echo "Size = $PIXEL" >> config.ini 
   echo "# Icon Color: white or black" >> config.ini
-
   while [[ "$COLOR" != "white" && "$COLOR" != "black" ]]
   do
     echo "Choose icon color"
@@ -41,8 +40,37 @@ if [[ $CONFIG = [bB] ]] ; then
     fi
   done
   echo "Color = $COLOR" >> config.ini
+  echo "#Horizontal Position: left or right" >> config.ini
+  while [[ "$XPOS" != "left" && "$XPOS" != "right" ]]
+  do
+    read -p "Shall icons align [l]eft or [r]ight? " XPOS
+    if [[ $XPOS = [lL] ]] ; then
+      XPOS="left"
+    elif [[ $XPOS = [rR] ]] ; then
+      XPOS="right"
+    fi
+  done
+  echo "Horizontal = $XPOS" >> config.ini
+  echo "#Vertical Position: top or bottom" >> config.ini
+  while [[ "$YPOS" != "top" && "$YPOS" != "bottom" ]]
+  do
+    read -p "Shall icons align [t]op or [b]ottom? " YPOS
+    if [[ $YPOS = [tT] ]] ; then
+      YPOS="top"
+    elif [[ $YPOS = [bT] ]] ; then
+      YPOS="bottom"
+    fi
+  done
+  echo "Vertical = $YPOS" >> config.ini
+  echo "# Padding from corner and between icons" >> config.ini
+  PAD=51
+  while [[ "$PAD" -lt 0 || "$PAD" -gt 50 ]]
+  do
+    read -p "Icon Padding [0 - 50]: " PAD
+  done
+  echo "Padding = $PAD" >> config.ini
+  
   echo "" >> config.ini
-
   echo "[Detection]" >> config.ini
   echo "Enable Wifi icon?"
   read -p "[Y]es or [n]o: " WIFI
