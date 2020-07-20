@@ -79,7 +79,7 @@ audio_icons = {
   "volume2":   iconpath3 + "ic_volume_up_" + icon_color + "_" + str(icon_size) + "dp.png",
   "disabled":  iconpath3 + "ic_volume_off_" + icon_color + "_"  + str(icon_size) + "dp.png"
 }
-icon_battery_critical_shutdown = iconpath2 + "battery-alert-128.png"
+icon_battery_critical_shutdown = iconpath2 + "battery-alert-120.png"
 
 wifi_carrier = "/sys/class/net/wlan0/carrier" # 1 when wifi connected, 0 when disconnected and/or ifdown
 wifi_linkmode = "/sys/class/net/wlan0/link_mode" # 1 when ifup, 0 when ifdown
@@ -361,7 +361,7 @@ def shutdown(low_voltage):
       overlay_processes["caution"].kill()
       del overlay_processes["caution"]
     
-    overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 64), "-y", str(int(resolution[1]) / 2 - 64), icon_battery_critical_shutdown])
+    overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 60), "-y", str(int(resolution[1]) / 2 - 60), icon_battery_critical_shutdown])
     os.system("sudo shutdown -P +1")
   else:
     os.system("sudo shutdown -c")
