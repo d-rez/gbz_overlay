@@ -8,7 +8,8 @@ read -r _
 mkdir ~/src
 cd ~/src
 
-read -p "Use [D]efault config.ini or [b]uild from scratch? " CONFIG
+echo "Default config.ini assumes Carbon theme at 1080p."
+read -p "Use [D]efault config values or [b]uild from scratch? " CONFIG
 if [[ $CONFIG = [bB] ]] ; then
   echo ""
   echo "Building config file"
@@ -32,32 +33,32 @@ if [[ $CONFIG = [bB] ]] ; then
   while [[ "$COLOR" != "white" && "$COLOR" != "black" ]]
   do
     echo "Choose icon color"
-    read -p "[b]lack or [w]hite: " COLOR
+    read -p "[b]lack or [W]hite: " COLOR
     if [[ $COLOR = [bB] ]] ; then
       COLOR="black"
-    elif [[ $COLOR = [wW] ]] ; then
+    elif [[ $COLOR = [wW] || $COLOR = "" ]] ; then
       COLOR="white"
     fi
   done
   echo "Color = $COLOR" >> config.ini
-  echo "#Horizontal Position: left or right" >> config.ini
+  echo "# Horizontal Position: left or right" >> config.ini
   while [[ "$XPOS" != "left" && "$XPOS" != "right" ]]
   do
-    read -p "Shall icons align [l]eft or [r]ight? " XPOS
+    read -p "Shall icons align [l]eft or [R]ight? " XPOS
     if [[ $XPOS = [lL] ]] ; then
       XPOS="left"
-    elif [[ $XPOS = [rR] ]] ; then
+    elif [[ $XPOS = [rR] || $XPOS = "" ]] ; then
       XPOS="right"
     fi
   done
   echo "Horizontal = $XPOS" >> config.ini
-  echo "#Vertical Position: top or bottom" >> config.ini
+  echo "# Vertical Position: top or bottom" >> config.ini
   while [[ "$YPOS" != "top" && "$YPOS" != "bottom" ]]
   do
-    read -p "Shall icons align [t]op or [b]ottom? " YPOS
+    read -p "Shall icons align [t]op or [B]ottom? " YPOS
     if [[ $YPOS = [tT] ]] ; then
       YPOS="top"
-    elif [[ $YPOS = [bT] ]] ; then
+    elif [[ $YPOS = [bT] || $YPOS = "" ]] ; then
       YPOS="bottom"
     fi
   done
@@ -66,7 +67,10 @@ if [[ $CONFIG = [bB] ]] ; then
   PAD=51
   while [[ "$PAD" -lt 0 || "$PAD" -gt 50 ]]
   do
-    read -p "Icon Padding [0 - 50]: " PAD
+    read -p "Icon Padding [8]: " PAD
+    if [[ $PAD = "" ]] ; then
+      PAD="8"
+    fi
   done
   echo "Padding = $PAD" >> config.ini
   
@@ -155,6 +159,7 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     echo "ActiveLow = True" >> config.ini
   fi
+  echo "" >> config.ini
   echo "config.ini creation complete"
 fi
 

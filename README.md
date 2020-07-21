@@ -19,9 +19,17 @@ This repository contains a script to display lovely slightly-transparent overlay
 
 ## More Screenshots
 
-![Battery discharging, frequency capped, low voltage, audio mute, bluetooth, low wifi](_images/240_allicons.png)
+![Overlay on TFT theme at 240p](_images/240_allicons.png)
+*Overlay on TFT theme at 240p*
+
+![Overlay on Carbon theme at 1080p](_images/1080_carbon.png)
+*Overlay on Carbon theme at 1080p*
+
+![Overlay on terminal](_images/1080_terminal.png)
+*Overlay on terminal*
 
 ![Battery Critical](_images/240_lowbat.png)
+*Battery Critical icon*
 
 # Automatic Install Instructions
 

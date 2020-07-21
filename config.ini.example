@@ -1,16 +1,17 @@
 # Created from config.ini.example
+# Default values assume Carbon theme at 1080p
 
 [Icons]
 # Icon Size: 24, 36 or 48
 Size = 48
 # Icon Color: white or black
 Color = white
-#Horizontal Position: left or right
+# Horizontal Position: left or right
 Horizontal = right
-#Vertical Position: top or bottom
+# Vertical Position: top or bottom
 Vertical = bottom
 # Padding from corner and between icons
-Padding = 4
+Padding = 8
 
 [Detection]
 Wifi = True
