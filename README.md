@@ -19,16 +19,16 @@ This repository contains a script to display lovely slightly-transparent overlay
 
 ## More Screenshots
 
-![Overlay on TFT theme at 240p](_images/240_allicons.png)
+![Overlay on TFT theme at 240p](_images/240_allicons.png)  
 *Overlay on TFT theme at 240p*
 
-![Overlay on Carbon theme at 1080p](_images/1080_carbon.png)
+![Overlay on Carbon theme at 1080p](_images/1080_carbon.png)  
 *Overlay on Carbon theme at 1080p*
 
-![Overlay on terminal](_images/1080_terminal.png)
+![Overlay on terminal](_images/1080_terminal.png)  
 *Overlay on terminal*
 
-![Battery Critical](_images/240_lowbat.png)
+![Battery Critical](_images/240_lowbat.png)  
 *Battery Critical icon*
 
 # Automatic Install Instructions
@@ -50,7 +50,7 @@ SSH into your device, or access the terminal using F4.
 ## Install pngview by AndrewFromMelbourne
     mkdir ~/src
     cd ~/src
-    git clone https://github.com/AndrewFromMelbourne/raspidmx.git
+    git clone https://github.com/AndrewFromMelbourne/raspidmx
     cd raspidmx/lib
     make
     cd ../pngview
@@ -59,7 +59,7 @@ SSH into your device, or access the terminal using F4.
 
 ## Download Material Design Icons by Google
     cd ~/src
-    git clone http://github.com/google/material-design-icons/ material-design-icons-master
+    git clone https://github.com/google/material-design-icons
 	
 ## Run RetroPie Status Overlay
 Install psutil module:
@@ -68,7 +68,7 @@ Install psutil module:
 Download the code:
 
     cd ~/src
-    git clone http://github.com/bverc/retropie_status_overlay
+    git clone https://github.com/bverc/retropie_status_overlay
     cp retropie_status_overlay/config.ini.example retropie_status_overlay/config.ini
 Test the code:
 

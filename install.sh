@@ -167,7 +167,7 @@ echo ""
 echo "Installing pngview by AndrewFromMelbourne"
 echo "--------------------------------------------------"
 cd ~/src
-git clone https://github.com/AndrewFromMelbourne/raspidmx.git
+git clone https://github.com/AndrewFromMelbourne/raspidmx
 cd ~/src/raspidmx/lib
 make
 cd ~/src/raspidmx/pngview
@@ -178,7 +178,7 @@ echo ""
 echo "Downloading Material Design Icons by Google"
 echo "--------------------------------------------------"
 cd ~/src
-git clone http://github.com/google/material-design-icons/ material-design-icons-master
+git clone https://github.com/google/material-design-icons
 
 echo ""
 echo "Installing required packages"
@@ -189,7 +189,7 @@ echo ""
 echo "Downloading RetroPie Status Overlay"
 echo "--------------------------------------------------"
 cd ~/src
-git clone http://github.com/bverc/retropie_status_overlay
+git clone https://github.com/bverc/retropie_status_overlay
 if [[ $CONFIG = [bB] ]] ; then
   echo "Moving built config.ini to ~/src/retropie_status_overlay"
   mv ~/src/config.ini ~/src/retropie_status_overlay/config.ini
