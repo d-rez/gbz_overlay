@@ -175,12 +175,6 @@ make
 sudo cp pngview /usr/local/bin/
 
 echo ""
-echo "Downloading Material Design Icons by Google"
-echo "--------------------------------------------------"
-cd ~/src
-git clone https://github.com/google/material-design-icons
-
-echo ""
 echo "Installing required packages"
 echo "--------------------------------------------------"
 sudo apt-get install python3-psutil python3-rpi.gpio

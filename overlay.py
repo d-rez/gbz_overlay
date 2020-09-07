@@ -38,9 +38,7 @@ resolution=re.search("(\d{3,}x\d{3,})", subprocess.check_output(fbfile.split()).
 my_logger.info(resolution)
 
 # Setup icons
-iconpath="/home/pi/src/material-design-icons/device/drawable-mdpi/"
-iconpath2 = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
-iconpath3="/home/pi/src/material-design-icons/av/drawable-mdpi/"
+iconpath = os.path.dirname(os.path.realpath(__file__)) + "/overlay_icons/"
 
 pngview_path="/usr/local/bin/pngview"
 y_position = config['Icons']['Padding']
@@ -49,10 +47,10 @@ if config['Icons']['Vertical'] == "bottom":
 pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", y_position, "-x"]
 
 icons = {
-  "under-voltage": iconpath2 + "flash_" + config['Icons']['Size'] + ".png",
-  "freq-capped": iconpath2 + "thermometer_" + config['Icons']['Size'] + ".png",
-  "throttled": iconpath2 + "thermometer-lines_" + config['Icons']['Size'] + ".png",
-  "battery_critical_shutdown": iconpath2 + "battery-alert-120.png",
+  "under-voltage": iconpath + "flash_" + config['Icons']['Size'] + ".png",
+  "freq-capped": iconpath + "thermometer_" + config['Icons']['Size'] + ".png",
+  "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
+  "battery_critical_shutdown": iconpath + "battery-alert_120.png",
   "wifi_4": iconpath + "ic_signal_wifi_4_bar_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
   "wifi_3": iconpath + "ic_signal_wifi_3_bar_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
   "wifi_2": iconpath + "ic_signal_wifi_2_bar_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
@@ -62,10 +60,10 @@ icons = {
   "bt_enabled": iconpath + "ic_bluetooth_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
   "bt_connected": iconpath + "ic_bluetooth_connected_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
   "bt_disabled": iconpath + "ic_bluetooth_disabled_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
-  "volume_0": iconpath3 + "ic_volume_mute_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
-  "volume_1": iconpath3 + "ic_volume_down_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
-  "volume_2": iconpath3 + "ic_volume_up_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
-  "volume_mute": iconpath3 + "ic_volume_off_" + config['Icons']['Color'] + "_"  + config['Icons']['Size'] + "dp.png"
+  "volume_0": iconpath + "ic_volume_mute_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
+  "volume_1": iconpath + "ic_volume_down_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
+  "volume_2": iconpath + "ic_volume_up_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png",
+  "volume_mute": iconpath + "ic_volume_off_" + config['Icons']['Color'] + "_"  + config['Icons']['Size'] + "dp.png"
 }
 
 wifi_carrier = "/sys/class/net/wlan0/carrier" # 1 when wifi connected, 0 when disconnected and/or ifdown
@@ -314,7 +312,7 @@ def battery(new_ingame):
     
     bat_iconpath = iconpath + "ic_battery_" + level_icon + "_" + config['Icons']['Color'] + "_" + config['Icons']['Size'] + "dp.png"
     if (level_icon == "alert_red"):
-      bat_iconpath = iconpath2 + "battery-alert_" + config['Icons']['Size'] + ".png"
+      bat_iconpath = iconpath + "battery-alert_" + config['Icons']['Size'] + ".png"
     elif not new_ingame:
       overlay_processes["bat"] = subprocess.Popen(pngview_call + [str(x_position(count)), bat_iconpath])
   return (level_icon, value_v)

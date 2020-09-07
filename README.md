@@ -56,10 +56,6 @@ SSH into your device, or access the terminal using F4.
     cd ../pngview
     make
     sudo cp pngview /usr/local/bin/
-
-## Download Material Design Icons by Google
-    cd ~/src
-    git clone https://github.com/google/material-design-icons
 	
 ## Run RetroPie Status Overlay
 Install psutil module:
