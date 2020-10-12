@@ -1,5 +1,6 @@
 # RetroPie Status Overlay
 Based on [gbz_overlay](https://github.com/d-rez/gbz_overlay) script by [d-rez](https://github.com/d-rez)
+Furher based on [retropie_status_overlay] https://github.com/bverc/retropie_status_overlay script by (https://github.com/bverc/)
 
 This repository contains a script to display lovely slightly-transparent overlays on top of your RetroPie games and emulationstation menus
 
@@ -34,51 +35,43 @@ This repository contains a script to display lovely slightly-transparent overlay
 # Automatic Install Instructions
 
 SSH into your device, or access the terminal using F4.
-
-    wget https://raw.githubusercontent.com/bverc/retropie_status_overlay/master/install.sh
-    chmod +x install.sh
-    ./install.sh
-
-Remove install script once complete
-
-    rm install.sh
-
-# Manual Install Instructions
-
-SSH into your device, or access the terminal using F4.
-
-## Install pngview by AndrewFromMelbourne
-    mkdir ~/src
-    cd ~/src
-    git clone https://github.com/AndrewFromMelbourne/raspidmx
-    cd raspidmx/lib
-    make
-    cd ../pngview
-    make
-    sudo cp pngview /usr/local/bin/
 	
 ## Run RetroPie Status Overlay
-Install psutil module:
 
-    sudo apt-get install python3-psutil
-Download the code:
+    `cd ~`
+    `git clone https://github.com/louisvarley/retropie_status_overlay`
+    `cd retropie_status_overlay`
+	`sudo bash install.sh`
 
-    cd ~/src
-    git clone https://github.com/bverc/retropie_status_overlay
-    cp retropie_status_overlay/config.ini.example retropie_status_overlay/config.ini
-Test the code:
+## Follow the onscreen instructions
 
-    python3 retropie_status_overlay/overlay.py
-You should see the overlay added to your interface
+	retropie_status_overlay will run as a service automatically at boot, and is called "overlay"
+	
+	You can stop and start this service by running 
+	`sudo service overlay stop`
+	or
+	`sudo service overlay start`	
 
-Now to get it to  run at boot:
 
-    sudo crontab -e
-    
-At the bottom of the file, add the line:
+## Battery Detection
 
-    @reboot python3 /home/pi/src/retropie_status_overlay/overlay.py
+	During setup you can choose if you are using a ADS1 or a MCP based chip. 
+	MCP requires SPI pins and you set these during setup. 
+	
+## Calibration
 
-reboot
-
+	Depending on many factors, atleast from my experience with MCP based chips. The ADC (the number that the MCP chip returns from the given voltage) 
+	can vary. This depends on the VREF voltage, if you are reading in the voltage from a voltage booster or from the battery. etc
+	You can use the config setting "Multiplier" to calibrate this. 
+	
+	To do this. Run Overlay manually using the command
+	`sudo python3 overlay.py`
+	
+	ensure you stop your current overlay service first
+	
+	Now using a multimeter check your battery voltage (or wherever your chip is reading from)
+	Increase the multiplier until the number shown on screen once per seconds, matches that of your multimeter. 
+	
+	For example. My battery reads 3.56 volts. My ADC without multiplier comes in at 2.7v. I added a multiplier of 1.35 which brings me my voltage from ADC to 3.564v which is close enough. 
+	Getting this correct will usually fix any problems with the device not showing as charging when a cable in inserted. 
 

@@ -303,11 +303,13 @@ def battery(new_ingame):
   if config.get('Detection','Type') == 'ADS1':
       value = adc.read_adc(0, gain=2/3)
       value_v = value * 0.003  
+      value_v = value_v * config.getfloat("Detection", "Multiplier")
       
   if config.get('Detection','Type') == 'MCP':
       value = adc.read_adc(0)
       value_v = value / 1023.0 * 3.3
-
+      value_v = value_v * config.getfloat("Detection", "Multiplier")
+      
   count+=1
   
   print(str(value_v))

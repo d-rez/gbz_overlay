@@ -34,10 +34,12 @@ ADCShutdown = False
 BatteryLDO = False
 # Do you have a GPIO Pin you wish to use for shutdown
 ShutdownGPIO = False
-#Hide Overlay when In-Game
+# Hide Overlay when In-Game
 HideInGame = False
-#Hide Any Environment Warnings, such as temperature
+# Hide Any Environment Warnings, such as temperature
 HideEnvWarnings = True
+# Used to Increase the ADC Voltage if you are getting an incorrect number, measure with a multimetre and calibrate
+Multiplier = 1.4
 
 [BatteryLDO]
 GPIO = 
