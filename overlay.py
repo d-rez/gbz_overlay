@@ -73,20 +73,25 @@ env_cmd="vcgencmd get_throttled"
 
 
 if config.getboolean('Detection','BatteryADC'):
-  import Adafruit_ADS1x15
-  adc = Adafruit_ADS1x15.ADS1015()
-  # Choose a gain of 1 for reading voltages from 0 to 4.09V.
-  # Or pick a different gain to change the range of voltages that are read:
-  #  - 2/3 = +/-6.144V
-  #  -   1 = +/-4.096V
-  #  -   2 = +/-2.048V
-  #  -   4 = +/-1.024V
-  #  -   8 = +/-0.512V
-  #  -  16 = +/-0.256V
-  # See table 3 in the ADS1015i/ADS1115 datasheet for more info on gain.
+  if config.get('BatteryADC','Type') == 'MCP':
+      import Adafruit_MCP3008
+      adc = Adafruit_MCP3008.MCP3008(clk=config.getint('BatteryADC','clk'), cs=config.getint('BatteryADC','cs'), miso=config.getint('BatteryADC','miso'), mosi=config.getint('BatteryADC','mosi'))
 
-  #charging no load: 4.85V max (full bat)
-  #charging es load: 4.5V max
+  if config.get('BatteryADC','Type') == 'ADS1':
+      import Adafruit_ADS1x15
+      adc = Adafruit_ADS1x15.ADS1015()
+      # Choose a gain of 1 for reading voltages from 0 to 4.09V.
+      # Or pick a different gain to change the range of voltages that are read:
+      #  - 2/3 = +/-6.144V
+      #  -   1 = +/-4.096V
+      #  -   2 = +/-2.048V
+      #  -   4 = +/-1.024V
+      #  -   8 = +/-0.512V
+      #  -  16 = +/-0.256V
+      # See table 3 in the ADS1015i/ADS1115 datasheet for more info on gain.
+
+      #charging no load: 4.85V max (full bat)
+      #charging es load: 4.5V max
 
   vmax = {"discharging": 3.95,
           "charging"   : 4.5 }
@@ -280,21 +285,32 @@ def environment():
     "freq-capped": bool(val & 0x02),
     "throttled": bool(val & 0x04)
   }
-  for k,v in env.items():
-    if v and not k in overlay_processes:
-      count += 1
-      overlay_processes[k] = subprocess.Popen(pngview_call + [str(x_position(count)), icons[k]])
-    elif not v and k in overlay_processes:
-      overlay_processes[k].kill()
-      del(overlay_processes[k])
-  return val
+  
+  if(config.get('Detection','HideEnvWarnings') == False):
+ 
+      for k,v in env.items():
+        if v and not k in overlay_processes:
+          count += 1
+          overlay_processes[k] = subprocess.Popen(pngview_call + [str(x_position(count)), icons[k]])
+        elif not v and k in overlay_processes:
+          overlay_processes[k].kill()
+          del(overlay_processes[k])
+      return val
 
 def battery(new_ingame):
   global battery_level, overlay_processes, battery_history, count
-  value = adc.read_adc(0, gain=2/3)
-  value_v = value * 0.003
   
+  if config.get('BatteryADC','Type') == 'ADS1':
+      value = adc.read_adc(0, gain=2/3)
+      value_v = value * 0.003  
+      
+  if config.get('BatteryADC','Type') == 'MCP':
+      value = adc.read_adc(0)
+      value_v = value / 1023.0 * 3.3
+
   count+=1
+  
+  print(str(value_v))
 
   battery_history.append(value_v)
   try:
@@ -345,18 +361,19 @@ def interrupt_shutdown(channel):
         my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
  
 def shutdown(low_voltage):
-  if low_voltage:
-    my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
-    if "caution" in overlay_processes:
-      overlay_processes["caution"].kill()
-      del overlay_processes["caution"]
-    
-    overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 60), "-y", str(int(resolution[1]) / 2 - 60), icons["battery_critical_shutdown"]])
-    os.system("sudo shutdown -P +1")
-  else:
-    os.system("sudo shutdown -c")
-    overlay_processes["caution"].kill()
-    my_logger.info("Power Restored, shutdown aborted.")
+  if config.getboolean('Shutdown','ShutdownLowVoltage') == True:
+      if low_voltage :
+        my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
+        if "caution" in overlay_processes:
+          overlay_processes["caution"].kill()
+          del overlay_processes["caution"]
+        
+        overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 60), "-y", str(int(resolution[1]) / 2 - 60), icons["battery_critical_shutdown"]])
+        os.system("sudo shutdown -P +1")
+      else:
+        os.system("sudo shutdown -c")
+        overlay_processes["caution"].kill()
+        my_logger.info("Power Restored, shutdown aborted.")
 
 GPIO.setmode(GPIO.BCM)
 if config.getboolean('Detection','BatteryLDO'):
@@ -383,7 +400,12 @@ audio_volume = 0
 while True:
   count = 0;
   # Check if retroarch is running
-  new_ingame = check_process('retroarch')
+  
+  if config.getboolean('Detection','HideInGame'):
+     new_ingame = check_process('retroarch')
+  else:
+     new_ingame = False   
+
   log = str("%s" % (datetime.now()))
   if config.getboolean('Detection','BatteryADC'):
     (battery_level, value_v) = battery(new_ingame)
@@ -410,7 +432,8 @@ while True:
     audio_state = audio(new_ingame)
     log = log + str(", Audio: %s %i%%" % (audio_state.name, audio_volume))
   env = environment()
-  my_logger.info(log + str(", throttle: %#0x" % (env)))
+  if(config.get('Detection','HideEnvWarnings') == False):
+    my_logger.info(log + str(", throttle: %#0x" % (env)))
   
   ingame = new_ingame
   time.sleep(5)

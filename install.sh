@@ -1,12 +1,22 @@
 #!/bin/bash
 
+#get script path
+SCRIPT=$(readlink -f $0)
+SCRIPTPATH=`dirname $SCRIPT`
+echo $SCRIPTPATH
+cd $SCRIPTPATH
+
+#if not root user, restart script as root
+if [ "$(whoami)" != "root" ]; then
+	echo "Switching to root user..."
+	sudo bash $SCRIPT
+	exit 1
+fi
+
 echo "Starting installation of Retropie Status Overlay"
 echo "Press ENTER to proceed or CTRL+C to abort"
 echo "--------------------------------------------------"
 read -r _
-
-mkdir ~/src
-cd ~/src
 
 echo "Default config.ini assumes Carbon theme at 1080p."
 read -p "Use [D]efault config values or [b]uild from scratch? " CONFIG
@@ -112,6 +122,48 @@ if [[ $CONFIG = [bB] ]] ; then
   fi
   echo "BatteryADC = $BATADC" >> config.ini 
   
+  echo "What chip are you using for ADC?"
+  read -p "[MCP] or [ADS1]: " CHIPTYPE
+  if [[ $CHIPTYPE = [MCP] ]] ; then
+    CHIPTYPE="MCP"
+  else
+    CHIPTYPE="ADS1"
+  fi
+  echo "Type = $CHIPTYPE" >> config.ini 
+    
+  if [[ $CHIPTYPE = [MCP] ]] ; then
+  echo "GPIO for CLK?"	
+  read -p "GPIO : " CLK
+  else
+    CLK=0	
+  fi
+  
+  if [[ $CHIPTYPE = [MCP] ]] ; then
+  echo "GPIO for MSIO?"	
+  read -p "GPIO : " MSIO  
+  else
+    MSIO=0	
+  fi
+  
+  if [[ $CHIPTYPE = [MCP] ]] ; then
+  echo "GPIO for MOSI?"	
+  read -p ": " MOSI  
+  else
+    MOSI=0	
+  fi
+  
+  if [[ $CHIPTYPE = [MCP] ]] ; then
+  echo "GPIO for CS?"	
+  read -p "GPIO : " CS    
+  else
+    CS=0	
+  fi
+    
+  echo "clk = $CLK" >> config.ini 
+  echo "msio = $MSIO" >> config.ini 
+  echo "mosi = $MOSI" >> config.ini 
+  echo "cs = $CS" >> config.ini   
+  
   echo "Enable Low Battery detection using GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " BATLDO
   if [[ $BATLDO = [yY] ]] ; then
@@ -142,6 +194,24 @@ if [[ $CONFIG = [bB] ]] ; then
   fi
   echo "ShutdownGPIO = $SD" >> config.ini
   
+  echo "Hide Overlay When In-Game"
+  read -p "[y]es or [N]o: " SD
+  if [[ $SD = [yY] ]] ; then
+	EOIG="True"
+  else
+    EOIG="False"
+  fi
+  echo "HideInGame = $EOIG" >> config.ini  
+  
+  echo "Hide Env Warnings (Low Voltage, Thermal Throttle etc)"
+  read -p "[y]es or [N]o: " SD
+  if [[ $SD = [yY] ]] ; then
+	HEW="True"
+  else
+    HEW="False"
+  fi
+  echo "HideEnvWarnings = $HEW" >> config.ini    
+  
   echo "" >> config.ini 
   echo "[BatteryLDO]" >> config.ini
   echo "GPIO = $LDOGPIO" >> config.ini
@@ -150,6 +220,18 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     echo "ActiveLow = True" >> config.ini
   fi
+  
+  echo "" >> config.ini  
+  echo "[Shutdown]" >> config.ini
+  
+  echo "Warn and shutdown when voltage is low, automatically"
+  read -p "[y]es or [N]o: " SD
+  if [[ $SD = [yY] ]] ; then
+	WSA="True"
+  else
+    WSA="False"
+  fi
+  echo "ShutdownLowVoltage = $WSA" >> config.ini    
   
   echo "" >> config.ini 
   echo "[ShutdownGPIO]" >> config.ini 
@@ -163,49 +245,67 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "config.ini creation complete"
 fi
 
+
+
 echo ""
 echo "Installing pngview by AndrewFromMelbourne"
 echo "--------------------------------------------------"
-cd ~/src
+cd $SCRIPTPATH
 git clone https://github.com/AndrewFromMelbourne/raspidmx
-cd ~/src/raspidmx/lib
+cd $SCRIPTPATH/raspidmx/lib
 make
-cd ~/src/raspidmx/pngview
+cd $SCRIPTPATH/raspidmx/pngview
 make
 sudo cp pngview /usr/local/bin/
 
 echo ""
-echo "Installing required packages"
+echo "Installing required packages..."
 echo "--------------------------------------------------"
-sudo apt-get install python3-psutil python3-rpi.gpio
+sudo apt-get install python3-psutil python3-rpi.gpio python3-pip
+
+echo ""
+echo "Installing MCP Adafruit..."
+echo "--------------------------------------------------"
+sudo pip3 install Adafruit_MCP3008
+
+echo ""
+echo "Installing ADS1 Adafruit..."
+echo "--------------------------------------------------"
+sudo pip3 install Adafruit_ADS1x15
 
 echo ""
 echo "Downloading RetroPie Status Overlay"
 echo "--------------------------------------------------"
-cd ~/src
+cd $SCRIPTPATH
+
 git clone https://github.com/bverc/retropie_status_overlay
 if [[ $CONFIG = [bB] ]] ; then
-  echo "Moving built config.ini to ~/src/retropie_status_overlay"
-  mv ~/src/config.ini ~/src/retropie_status_overlay/config.ini
+  echo "Moving built config.ini to $SCRIPTPATH"
 else
   echo "Copying default config.ini"
   echo "Edit this file after install is complete"
-  cp ~/src/retropie_status_overlay/config.ini.example ~/src/retropie_status_overlay/config.ini
+  cp $SCRIPTPATH/config.ini.example $SCRIPTPATH/config.ini
 fi
 
-echo ""
-echo "Add Retropie Status Overlay to Crontab"
-echo "--------------------------------------------------"
-(crontab -l ; echo "@reboot python3 /home/pi/src/retropie_status_overlay/overlay.py") | sort - | uniq - | crontab -
-echo "Your crontab now looks like:"
-crontab -l
+echo "Installing As Service..."
+echo 
+
+servicefile=$SCRIPTPATH"/overlay.service"
+
+sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' $servicefile
+cp $servicefile /lib/systemd/system/
+
+systemctl enable overlay
+service overlay start
 
 echo ""
 echo "--------------------------------------------------"
 echo "Retropie Status Overlay installation complete!"
 echo "--------------------------------------------------"
-echo "Retropie Status Overlay will now run at next boot."
-echo "~/src/retropie_status_overlay/config.ini may be edited at any time."
+echo "Retropie Status Overlay will now run automatically at boot as a service."
+echo "$SCRIPTPATH/config.ini may be edited at any time."
 echo "You might also want to delete this file."
-echo "A copy remains in ~/src/retropie_status_overlay/"
+echo "You can stop and start the overlay service at anytime by doing sudo service overlay [stop|stop]"
+echo "A copy remains in $SCRIPTPATH/"
 echo "Use 'rm install.sh' to remove it."
+echo "Use remove.sh at anytime to uninstall"

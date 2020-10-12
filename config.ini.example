@@ -21,9 +21,27 @@ BatteryADC = False
 BatteryLDO = False
 ShutdownGPIO = False
 
+# Hide Overlay InGame
+HideInGame = True
+
+# Hide Environment Warnings
+HideEnvWarnings = False
+
 [BatteryLDO]
 GPIO = 27
 ActiveLow = True
+
+[BatteryADC]
+# Chip used for ADC, [ADS1,MCP]
+Type = MCP
+# Only Relevent if using MCP on SPI Interface
+clk = 11
+miso = 9
+mosi = 10
+cs = 8
+
+[Shutdown]
+ShutdownLowVoltage = False
 
 [ShutdownGPIO]
 GPIO = 3
