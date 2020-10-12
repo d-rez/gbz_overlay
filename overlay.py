@@ -73,11 +73,11 @@ env_cmd="vcgencmd get_throttled"
 
 
 if config.getboolean('Detection','BatteryADC'):
-  if config.get('BatteryADC','Type') == 'MCP':
+  if config.get('Detection','Type') == 'MCP':
       import Adafruit_MCP3008
-      adc = Adafruit_MCP3008.MCP3008(clk=config.getint('BatteryADC','clk'), cs=config.getint('BatteryADC','cs'), miso=config.getint('BatteryADC','miso'), mosi=config.getint('BatteryADC','mosi'))
+      adc = Adafruit_MCP3008.MCP3008(clk=config.getint('Detection','clk'), cs=config.getint('Detection','cs'), miso=config.getint('Detection','miso'), mosi=config.getint('Detection','mosi'))
 
-  if config.get('BatteryADC','Type') == 'ADS1':
+  if config.get('Detection','Type') == 'ADS1':
       import Adafruit_ADS1x15
       adc = Adafruit_ADS1x15.ADS1015()
       # Choose a gain of 1 for reading voltages from 0 to 4.09V.
@@ -300,11 +300,11 @@ def environment():
 def battery(new_ingame):
   global battery_level, overlay_processes, battery_history, count
   
-  if config.get('BatteryADC','Type') == 'ADS1':
+  if config.get('Detection','Type') == 'ADS1':
       value = adc.read_adc(0, gain=2/3)
       value_v = value * 0.003  
       
-  if config.get('BatteryADC','Type') == 'MCP':
+  if config.get('Detection','Type') == 'MCP':
       value = adc.read_adc(0)
       value_v = value / 1023.0 * 3.3
 
@@ -361,7 +361,7 @@ def interrupt_shutdown(channel):
         my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
  
 def shutdown(low_voltage):
-  if config.getboolean('Shutdown','ShutdownLowVoltage') == True:
+  if config.getboolean('Detection','ADCShutdown') == True:
       if low_voltage :
         my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
         if "caution" in overlay_processes:
