@@ -77,6 +77,11 @@ if config.getboolean('Detection','BatteryADC'):
       import Adafruit_MCP3008
       adc = Adafruit_MCP3008.MCP3008(clk=config.getint('Detection','clk'), cs=config.getint('Detection','cs'), miso=config.getint('Detection','miso'), mosi=config.getint('Detection','mosi'))
 
+      vmax = {"discharging": 4.0,
+              "charging"   : 4.5 }
+      vmin = {"discharging": 3.2,
+              "charging"   : 4.25 }
+
   if config.get('Detection','Type') == 'ADS1':
       import Adafruit_ADS1x15
       adc = Adafruit_ADS1x15.ADS1015()
@@ -93,10 +98,11 @@ if config.getboolean('Detection','BatteryADC'):
       #charging no load: 4.85V max (full bat)
       #charging es load: 4.5V max
 
-  vmax = {"discharging": 3.95,
-          "charging"   : 4.5 }
-  vmin = {"discharging": 3.2,
-          "charging"   : 4.25 }
+      vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
+              "charging"   : config.getfloat("Detection", "VMaxCharging") }
+      vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
+              "charging"   : config.getfloat("Detection", "VMinCharging") }
+              
   bat_icons = { "discharging": [ "alert_red", "alert", "20", "30", "30", "50", "60",
                              "60", "80", "90", "full", "full" ],
             "charging"   : [ "charging_20", "charging_20", "charging_20",
@@ -130,7 +136,7 @@ def x_position(count):
 def translate_bat(voltage):
   # Figure out how 'wide' each range is
   state = voltage <= vmax["discharging"] and "discharging" or "charging"
-
+  print("Battery Is " + state)
   leftSpan = vmax[state] - vmin[state]
   rightSpan = len(bat_icons[state]) - 1
 
@@ -312,7 +318,7 @@ def battery(new_ingame):
       
   count+=1
   
-  print(str(value_v))
+  print("Battery Voltage " + str(value_v))
 
   battery_history.append(value_v)
   try:

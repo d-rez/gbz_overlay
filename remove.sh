@@ -34,7 +34,7 @@ systemctl disable overlay
 rm /lib/systemd/system/overlay.service
 
 echo
-echo "~/src/ will be left in place, you are free to manually remove"
+echo "$SCRIPTPATH will be left in place, you are free to manually remove"
 
 echo ""
 echo "--------------------------------------------------"

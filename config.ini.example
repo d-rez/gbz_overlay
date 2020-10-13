@@ -3,43 +3,64 @@
 [Icons]
 # Icon Size: 24, 36 or 48
 Size = 24
+
 # Icon Color: white or black
 Color = white
+
 # Horizontal Position: left or right
 Horizontal = left
+
 # Vertical Position: top or bottom
 Vertical = top
+
 # Padding from corner and between icons
 Padding = 8
 
 [Detection]
 # Show WiFi Icon
 Wifi = True
+
 # Show Bluetooth Icon
 Bluetooth = False
+
 # Show Audio Icon
 Audio = False
+
 # Enable Battery Voltage Monitoring Via ADC
 BatteryADC = True
+
 # What Chip are you using for ADC
 Type = MCP
+
 # If MCP what are you SPI Pins
 clk = 11
 miso = 9
 mosi = 10
 cs = 8
+
 # Should low ADC cause shutdown
 ADCShutdown = False
+
 # Do you have a LDO GPIO Pin to Monitor Low Battery
 BatteryLDO = False
+
 # Do you have a GPIO Pin you wish to use for shutdown
 ShutdownGPIO = False
-# Hide Overlay when In-Game
+
+#Hide Overlay when In-Game
 HideInGame = False
-# Hide Any Environment Warnings, such as temperature
+
+#Hide Any Environment Warnings, such as temperature
 HideEnvWarnings = True
-# Used to Increase the ADC Voltage if you are getting an incorrect number, measure with a multimetre and calibrate
-Multiplier = 1.4
+
+#Multiplier for ADC Number, See Read Me
+Multiplier = 1.54
+
+#Change how your battery calculations are made, See Read Me
+VMaxDischarging = 4
+VMaxCharging = 4.5
+VMinDischarging = 3.2
+VMinCharging = 4.25
 
 [BatteryLDO]
 GPIO = 

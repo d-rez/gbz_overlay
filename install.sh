@@ -180,19 +180,18 @@ if [[ $CONFIG = [bB] ]] ; then
 	  echo "miso = $MISO" >> config.ini 
 	  echo "mosi = $MOSI" >> config.ini 
 	  echo "cs = $CS" >> config.ini   
- 
-	  echo "Enable Low Battery shutdown using ADC"
-	  read -p "[y]es or [N]o: " SD
-	  if [[ $SD = [yY] ]] ; then
-		WSA="True"
-	  else
-		WSA="False"
-	  fi
-	  echo "ADCShutdown = $WSA" >> config.ini    	  
- 
+
+	  echo "ADCShutdown = N" >> config.ini    
+	  
+	  echo "Multiplier = 1" >> config.ini 	
+	  echo "VMaxDischarging = 3.95" >> config.ini 	
+	  echo "VMaxCharging = 4.5" >> config.ini 	
+	  echo "VMinDischarging = 3.2" >> config.ini 		  
+ 	  echo "VMinCharging = 4.25" >> config.ini 	
+	  
   fi
   
-  echo "Enable Low Battery protection using GPIO? (Requires specific hardware)"
+  echo "Enable Low Battery protection using GPIO (LDO)? (Requires specific hardware)"
   read -p "[y]es or [N]o: " BATLDO
   if [[ $BATLDO = [yY] ]] ; then
 	BATLDO="True"
@@ -262,8 +261,6 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "config.ini creation complete"
 fi
 
-
-
 echo ""
 echo -e "${CYAN}"
 echo "Installing pngview by AndrewFromMelbourne"
@@ -312,15 +309,13 @@ echo -e "${NONE}"
 echo "--------------------------------------------------"
 echo 
 
-servicefile=$SCRIPTPATH"/overlay.service"
+servicefile=$SCRIPTPATH"/retropi_status_overlay.service"
 
 sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' $servicefile
 cp $servicefile /lib/systemd/system/
 
-
-
-systemctl enable overlay
-service overlay start
+systemctl enable retropi_status_overlay
+service retropi_status_overlay start
 
 echo ""
 echo "--------------------------------------------------"
@@ -335,3 +330,5 @@ echo ""
 echo "You can stop and start the overlay service at anytime by doing sudo service overlay [stop|stop]"
 echo ""
 echo "Use remove.sh at anytime to uninstall Retropie status overlay"
+echo ""
+echo "There a number of additional options to configure in your $SCRIPTPATH/config.ini file, see readme for more details"
