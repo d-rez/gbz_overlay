@@ -137,7 +137,7 @@ You can then edit your config. (maybe disable ADCShutdown) and then when confirm
 - Configured install.sh to just use directory it is in for install and service
 - Added multiplier in config, mainly for MCP Chip reasons
 - overlay.py to use MCP Chip
-- config.ini to disable "hide in game"
+- config.ini to enable or disable overlay in game
 - config.ini to disable environmental warnings
 - Changed from a crontab based job to a systemd based service 
 
