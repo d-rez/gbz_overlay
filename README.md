@@ -126,11 +126,11 @@ You can then edit your config. (maybe disable ADCShutdown) and then when confirm
  `systemctl enable retropi_status_overlay`
 ## Change Log
 
-**12/10/2020 - SEAL Team Ricks**
+**12/10/2020 - louisvarley**
 - Moved some of the VMin/VMax settings from hard coded to config.ini
  - renamed service from overlay to retropie_status_overlay to prevent clashes
 
-**13/10/2020- SEAL Team Ricks**
+**13/10/2020- louisvarley**
 - install.sh for MCP Chip and API Settings
 - Added some color to install.sh
 - Added Adafruit_MCP3008 to install.sh
