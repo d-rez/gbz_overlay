@@ -77,10 +77,10 @@ if config.getboolean('Detection','BatteryADC'):
       import Adafruit_MCP3008
       adc = Adafruit_MCP3008.MCP3008(clk=config.getint('Detection','clk'), cs=config.getint('Detection','cs'), miso=config.getint('Detection','miso'), mosi=config.getint('Detection','mosi'))
 
-      vmax = {"discharging": 4.0,
-              "charging"   : 4.5 }
-      vmin = {"discharging": 3.2,
-              "charging"   : 4.25 }
+      vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
+              "charging"   : config.getfloat("Detection", "VMaxCharging") }
+      vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
+              "charging"   : config.getfloat("Detection", "VMinCharging") }
 
   if config.get('Detection','Type') == 'ADS1':
       import Adafruit_ADS1x15
@@ -135,6 +135,9 @@ def x_position(count):
 
 def translate_bat(voltage):
   # Figure out how 'wide' each range is
+  
+  print(vmax["discharging"])
+  
   state = voltage <= vmax["discharging"] and "discharging" or "charging"
   print("Battery Is " + state)
   leftSpan = vmax[state] - vmin[state]

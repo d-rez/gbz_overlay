@@ -28,10 +28,10 @@ rm /usr/local/bin/pngview
 echo "Removing Service..."
 echo
 
-service overlay stop
+service retropie-status-overlay stop
 
-systemctl disable overlay
-rm /lib/systemd/system/overlay.service
+systemctl disable retropie-status-overlay
+rm /lib/systemd/system/retropie-status-overlay.service
 
 echo
 echo "$SCRIPTPATH will be left in place, you are free to manually remove"
