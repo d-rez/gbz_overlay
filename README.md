@@ -50,12 +50,12 @@ SSH into your device, or access the terminal using F4.
 
 ## Follow the onscreen instructions
 
-retropie_status_overlay will run as a service automatically at boot, and is called "retropie_status_overlay"
+retropie_status_overlay will run as a service automatically at boot, and is called "retropie-status-overlay"
 	
 You can stop and start this service by running 
 	
-	sudo service retropie_status_overlay stop
-	sudo service retropie_status_overlay start
+	sudo service retropie-status-overlay stop
+	sudo service retropie-status-overlay start
 
 
 ## Battery Detection
@@ -75,10 +75,9 @@ This depends on the VREF voltage, if you are reading in the voltage from a volta
 
 You can use the config setting "Multiplier" to calibrate this. 
 	
-	
 To do this. 
 - Insert a fully charged battery
-- Stop overlay service `sudo service retropie_status_overlay  stop`
+- Stop overlay service `sudo service retropie-status-overlay  stop`
 - Run overlay manually using the command `sudo python3 overlay.py`
 - Make note if the voltage when the device is running using a multimeter
 - Compare this to the voltage displayed by overlay
@@ -118,12 +117,12 @@ If you enable this before you have properly calibrated. You can get stuck in a l
 ### Stuck in Shutdown Loop
 As above if you are stuck in a shutdown loop you will find the console wants to shutdown within 60 seconds of boot. You have a limited time to issue this command. 
 
- `systemctl disable retropi_status_overlay`
+ `systemctl disable retropi-status-overlay`
 
 This will stop overlay running on boot. 
 You can then edit your config. (maybe disable ADCShutdown) and then when confirmed working, re-enable
 
- `systemctl enable retropi_status_overlay`
+ `systemctl enable retropi-status-overlay`
 ## Change Log
 
 **12/10/2020 - louisvarley**
@@ -141,3 +140,5 @@ You can then edit your config. (maybe disable ADCShutdown) and then when confirm
 - config.ini to disable environmental warnings
 - Changed from a crontab based job to a systemd based service 
 
+**30/10/2020 louisvarley**
+- Fixed name of service, change underscore to dash
