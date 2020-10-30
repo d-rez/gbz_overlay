@@ -69,17 +69,16 @@ After install, you will need to make some changes to config.ini to ensure everyt
 
 ## Calibration
 
-Depending on many factors, from my experience with MCP based chips. The ADC (the number that the MCP chip returns from the given voltage) can vary. 
-
-This depends on the VREF voltage, if you are reading in the voltage from a voltage booster or from the battery, some batterys have slight voltage variences, different chips. 
+Depending on many factors, from my experience with MCP based chips. 
+The ADC (the number that the MCP chip returns from the given voltage) can vary depending on various factors such as VREF voltage. Some batterys have slight voltage variences, different chips sometimes seem to give slight different ADC values. 
 
 You can use the config setting "Multiplier" to calibrate this. 
 	
 To do this. 
 - Insert a fully charged battery
 - Stop overlay service `sudo service retropie-status-overlay  stop`
-- Run overlay manually using the command `sudo python3 overlay.py`
-- Make note if the voltage when the device is running using a multimeter
+- Run overlay manually using the command from your working directory `sudo python3 overlay.py`
+- Make note of the voltage when the device is running using a multimeter
 - Compare this to the voltage displayed by overlay
 - Increase the multiplier in the config.ini file (2 decimal increments may be needed) until overlay and your multimeter have the same voltage. 
 
@@ -90,7 +89,11 @@ To do this.
 If you fail to calibrate you will have issues, such as the device not knowing its charged, thinking its empty when not, or full when not. 
 
 ## VMax, VMin, Charging and Discharging
-These lines in config.ini dictate what is considered the Max and Min Thresholds and what there charging and discharging voltages are. This will really help narrow down when overlay considers the system charging or discharging.
+These lines in config.ini dictate what is considered the Max and Min Thresholds and what there charging and discharging voltages are. This will really help narrow down when overlay considers the system charging or discharging. If these are not correct, symptoms include
+
+- Shutting down before the battery has run low enough
+- Showing charging when the battery is full but not charging
+- Not showing charging when charger is plugged in
 
 These can be calculated by again using a multimeter.  
 
@@ -110,7 +113,7 @@ When Battery is almost dead and not being charged
 
 With your multipiers and VMax/VMin Configured and confirmed as working you can enable ADCShutdown. This will shutdown your PI When the battery Reaches the VMin State. 
 
-If you enable this before you have properly calibrated. You can get stuck in a loop where by the console boots and shutdowns down again, giving you only 60 seconds to disable the service. 
+If you enable this before you have properly calibrated or set your VMINs and VMAXs, You can get stuck in a loop where by the PI boots and shutdowns down again, giving you only 60 seconds to disable the service. 
 
 ## Troubleshooting
 
