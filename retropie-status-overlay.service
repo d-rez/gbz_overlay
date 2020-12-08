@@ -3,7 +3,7 @@ Description=overlay-daemon
 
 [Service]
 Type=simple
-WorkingDirectory=/media/usb0/home/pi/retropie_status_overlay
+WorkingDirectory=WORKING_DIRECTORY
 ExecStart=/usr/bin/python3 -u overlay.py
 Restart=on-failure
 RestartSec=1
