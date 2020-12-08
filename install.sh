@@ -310,9 +310,9 @@ echo "--------------------------------------------------"
 echo 
 
 servicefile=$SCRIPTPATH"/retropie-status-overlay.service"
-
-sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' $servicefile
 cp $servicefile /lib/systemd/system/
+
+sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' /lib/systemd/system/$servicefile
 
 systemctl enable retropie-status-overlay
 service retropie-status-overlay start
