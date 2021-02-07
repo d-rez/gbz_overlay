@@ -18,19 +18,21 @@ Vertical = bottom
 Padding = 8
 
 [Detection]
-# Show WiFi Icon
+# Enable WiFi Icon
 Wifi = True
 
-# Show Bluetooth Icon
+# Enable Bluetooth Icon
 Bluetooth = True
 
-# Show Audio Icon
+# Enable Audio Icon
 Audio = True
 
 # Enable Battery Voltage Monitoring Via ADC
 BatteryADC = False
 
-# What Chip are you using for ADC
+# Which chip are you using for ADC (Only applies if BatteryADC=True)
+# MCP  : MCP3008
+# ADS1 : ADS1x15
 Type = MCP
 
 # If MCP what are you SPI Pins
@@ -38,6 +40,15 @@ clk = 11
 miso = 9
 mosi = 10
 cs = 8
+
+# Multiplier for ADC Number, See Read Me
+Multiplier = 1.54
+
+# Change how your battery calculations are made, See Read Me
+VMaxDischarging = 4
+VMaxCharging = 4.5
+VMinDischarging = 3.2
+VMinCharging = 4.25
 
 # Should low ADC cause shutdown
 ADCShutdown = False
@@ -48,20 +59,11 @@ BatteryLDO = False
 # Do you have a GPIO Pin you wish to use for shutdown
 ShutdownGPIO = False
 
-#Hide Overlay when In-Game
+# Hide Overlay when In-Game
 HideInGame = False
 
-#Hide Any Environment Warnings, such as temperature
-HideEnvWarnings = True
-
-#Multiplier for ADC Number, See Read Me
-Multiplier = 1.54
-
-#Change how your battery calculations are made, See Read Me
-VMaxDischarging = 4
-VMaxCharging = 4.5
-VMinDischarging = 3.2
-VMinCharging = 4.25
+# Hide Any Environment Warnings, such as temperature
+HideEnvWarnings = False
 
 [BatteryLDO]
 GPIO = 27

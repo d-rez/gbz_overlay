@@ -41,7 +41,7 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "" >> config.ini
 
   echo "[Icons]" >> config.ini 
-  echo "# Icon Size: 24, 36 or 48" >> config.ini 
+  echo "# Icon Size: 24, 36 or 48" >> config.ini
   while [[ $PIXEL != "24" && $PIXEL != "36" && $PIXEL != "48" ]]
   do
     echo "Choose icon size. 36px or lower recommened for low res screens."
@@ -50,7 +50,8 @@ if [[ $CONFIG = [bB] ]] ; then
       PIXEL="48"
     fi
   done
-  echo "Size = $PIXEL" >> config.ini 
+  echo "Size = $PIXEL" >> config.ini
+  echo "" >> config.ini
   echo "# Icon Color: white or black" >> config.ini
   while [[ "$COLOR" != "white" && "$COLOR" != "black" ]]
   do
@@ -63,6 +64,7 @@ if [[ $CONFIG = [bB] ]] ; then
     fi
   done
   echo "Color = $COLOR" >> config.ini
+  echo "" >> config.ini
   echo "# Horizontal Position: left or right" >> config.ini
   while [[ "$XPOS" != "left" && "$XPOS" != "right" ]]
   do
@@ -74,6 +76,7 @@ if [[ $CONFIG = [bB] ]] ; then
     fi
   done
   echo "Horizontal = $XPOS" >> config.ini
+  echo "" >> config.ini
   echo "# Vertical Position: top or bottom" >> config.ini
   while [[ "$YPOS" != "top" && "$YPOS" != "bottom" ]]
   do
@@ -85,6 +88,7 @@ if [[ $CONFIG = [bB] ]] ; then
     fi
   done
   echo "Vertical = $YPOS" >> config.ini
+  echo "" >> config.ini
   echo "# Padding from corner and between icons" >> config.ini
   PAD=51
   while [[ "$PAD" -lt 0 || "$PAD" -gt 50 ]]
@@ -98,6 +102,7 @@ if [[ $CONFIG = [bB] ]] ; then
   
   echo "" >> config.ini
   echo "[Detection]" >> config.ini
+  echo "# Enable WiFi Icon" >> config.ini
   echo "Enable Wifi icon?"
   read -p "[Y]es or [n]o: " WIFI
   if [[ $WIFI = [nN] ]] ; then
@@ -106,7 +111,9 @@ if [[ $CONFIG = [bB] ]] ; then
     WIFI="True"
   fi
   echo "Wifi = $WIFI" >> config.ini
+  echo "" >> config.ini
   
+  echo "# Enable Bluetooth Icon" >> config.ini
   echo "Enable Blutooth icon?"
   read -p "[Y]es or [n]o: " BT
   if [[ $BT = [nN] ]] ; then
@@ -115,7 +122,9 @@ if [[ $CONFIG = [bB] ]] ; then
     BT="True"
   fi
   echo "Bluetooth = $BT" >> config.ini
- 
+  echo "" >> config.ini
+
+  echo "# Enable Audio Icon" >> config.ini
   echo "Enable Audio icon?"
   read -p "[Y]es or [n]o: " AUDIO
   if [[ $AUDIO = [nN] ]] ; then
@@ -124,7 +133,9 @@ if [[ $CONFIG = [bB] ]] ; then
     AUDIO="True"
   fi
   echo "Audio = $AUDIO" >> config.ini
-  
+  echo "" >> config.ini
+
+  echo "# Enable Battery Voltage Monitoring Via ADC" >> config.ini
   echo "Enable Battery Voltage detection using ADC? (Requires specific hardware)"
   read -p "[y]es or [N]o: " BATADC
   if [[ $BATADC = [yY] ]] ; then
@@ -132,19 +143,18 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     BATADC="False"
   fi
-
-
-  echo "BatteryADC = $BATADC" >> config.ini 
+  echo "BatteryADC = $BATADC" >> config.ini
+  echo "" >> config.ini  
   
   if [[ $BATADC = "True" ]] ; then
-    echo "Which hardware are you using for ADC?"
-    read -p "[MCP] or [ADS1]: " CHIPTYPE
+    read -p "[MCP]3008 or  [ADS1]x15: " CHIPTYPE
     if [[ $CHIPTYPE = "MCP" ]] ; then
       CHIPTYPE="MCP"
-    else
+    elif [[ $CHIPTYPE = "ADS1" ]] ; then
       CHIPTYPE="ADS1"
+    else
+      CHIPTYPE="None"
     fi
-    echo "Type = $CHIPTYPE" >> config.ini
 
     if [[ $CHIPTYPE = "MCP" ]] ; then
       echo "GPIO for CLK?"
@@ -173,22 +183,38 @@ if [[ $CONFIG = [bB] ]] ; then
     else
       CS=0
     fi
-
-    echo "clk = $CLK" >> config.ini
-    echo "miso = $MISO" >> config.ini
-    echo "mosi = $MOSI" >> config.ini
-    echo "cs = $CS" >> config.ini
-
-    echo "ADCShutdown = N" >> config.ini
-
-    echo "Multiplier = 1" >> config.ini
-    echo "VMaxDischarging = 3.95" >> config.ini
-    echo "VMaxCharging = 4.5" >> config.ini
-    echo "VMinDischarging = 3.2" >> config.ini
-    echo "VMinCharging = 4.25" >> config.ini
-
   fi
 
+  echo "# Which chip are you using for ADC (Only applies if BatteryADC=True)" >> config.ini 
+  echo "# MCP  : MCP3008" >> config.ini
+  echo "# ADS1 : ADS1x15" >> config.ini
+  echo "Which hardware are you using for ADC?"
+  echo "Type = $CHIPTYPE" >> config.ini
+  echo "" >> config.ini
+  
+  echo "# If MCP what are you SPI Pins" >> config.ini
+  echo "clk = $CLK" >> config.ini
+  echo "miso = $MISO" >> config.ini
+  echo "mosi = $MOSI" >> config.ini
+  echo "cs = $CS" >> config.ini
+  echo "" >> config.ini
+
+  echo "# Multiplier for ADC Number, See Read Me" >> config.ini
+  echo "Multiplier = 1" >> config.ini
+  echo "" >> config.ini
+  
+  echo "# Change how your battery calculations are made, See Read Me" >> config.ini
+  echo "VMaxDischarging = 3.95" >> config.ini
+  echo "VMaxCharging = 4.5" >> config.ini
+  echo "VMinDischarging = 3.2" >> config.ini
+  echo "VMinCharging = 4.25" >> config.ini
+  echo "" >> config.ini
+  
+  echo "# Should low ADC cause shutdown" >> config.ini
+  echo "ADCShutdown = N" >> config.ini
+  echo "" >> config.ini
+
+  echo "# Do you have a LDO GPIO Pin to Monitor Low Battery" >> config.ini
   echo "Enable Low Battery detection using GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " BATLDO
   if [[ $BATLDO = [yY] ]] ; then
@@ -203,7 +229,9 @@ if [[ $CONFIG = [bB] ]] ; then
     BATLDO="False"
   fi
   echo "BatteryLDO = $BATLDO" >> config.ini
+  echo "" >> config.ini
 
+  echp "# Do you have a GPIO Pin you wish to use for shutdown" >> config.ini
   echo "Enable Shutdown via GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
@@ -217,9 +245,12 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     SD="False"
   fi
-  echo "ShutdownGPIO = $SD" >> config.ini
   
+  echo "# Do you have a GPIO Pin you wish to use for shutdown" >> config.ini
+  echo "ShutdownGPIO = $SD" >> config.ini
   echo "" >> config.ini
+
+  echo "# Hide Overlay when In-Game" >> config.ini
   echo "Hide Overlay When In-Game"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
@@ -228,7 +259,9 @@ if [[ $CONFIG = [bB] ]] ; then
     EOIG="False"
   fi
   echo "HideInGame = $EOIG" >> config.ini
+  echo "" >> config.ini
 
+  echo "# Hide Any Environment Warnings, such as temperature" >> config.ini
   echo "Hide Env Warnings (Low Voltage, Thermal Throttle etc)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
@@ -237,8 +270,8 @@ if [[ $CONFIG = [bB] ]] ; then
     HEW="False"
   fi
   echo "HideEnvWarnings = $HEW" >> config.ini
-
   echo "" >> config.ini
+
   echo "[BatteryLDO]" >> config.ini
   echo "GPIO = $LDOGPIO" >> config.ini
   if [[ $LDPOL = [hH] ]] ; then
@@ -246,7 +279,6 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     echo "ActiveLow = True" >> config.ini
   fi
-  
   echo "" >> config.ini
 
   echo "[ShutdownGPIO]" >> config.ini 
