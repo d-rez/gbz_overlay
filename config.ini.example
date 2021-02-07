@@ -1,17 +1,18 @@
-# Default Example
+# Created from config.ini.example
+# Default values assume Carbon theme at 1080p
 
 [Icons]
 # Icon Size: 24, 36 or 48
-Size = 24
+Size = 48
 
 # Icon Color: white or black
 Color = white
 
 # Horizontal Position: left or right
-Horizontal = left
+Horizontal = right
 
 # Vertical Position: top or bottom
-Vertical = top
+Vertical = bottom
 
 # Padding from corner and between icons
 Padding = 8
@@ -21,13 +22,13 @@ Padding = 8
 Wifi = True
 
 # Show Bluetooth Icon
-Bluetooth = False
+Bluetooth = True
 
 # Show Audio Icon
-Audio = False
+Audio = True
 
 # Enable Battery Voltage Monitoring Via ADC
-BatteryADC = True
+BatteryADC = False
 
 # What Chip are you using for ADC
 Type = MCP
@@ -63,10 +64,9 @@ VMinDischarging = 3.2
 VMinCharging = 4.25
 
 [BatteryLDO]
-GPIO = 
+GPIO = 27
 ActiveLow = True
 
 [ShutdownGPIO]
-GPIO = 
+GPIO = 3
 ActiveLow = True
-

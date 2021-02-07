@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# Authors: d-rez, bverc
+# Authors: d-rez, bverc, louisvarley
 # Requires:
 # - pngview by AndrewFromMelbourne
 # - material-design-icons by google
@@ -98,24 +98,24 @@ if config.getboolean('Detection','BatteryADC'):
       #charging no load: 4.85V max (full bat)
       #charging es load: 4.5V max
 
+      # From my (d-rez) tests:
+      # over 4V => charging
+      # 4.7V => charging and charged 100%
+      # 3.9V => not charging, 100%
+      # 3.2V => will die in 10 mins under load, shut down
+      # 3.3V => warning icon?
+
       vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
               "charging"   : config.getfloat("Detection", "VMaxCharging") }
       vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
               "charging"   : config.getfloat("Detection", "VMinCharging") }
-              
+
   bat_icons = { "discharging": [ "alert_red", "alert", "20", "30", "30", "50", "60",
                              "60", "80", "90", "full", "full" ],
             "charging"   : [ "charging_20", "charging_20", "charging_20",
                              "charging_30", "charging_30", "charging_50",
                              "charging_60", "charging_60", "charging_80",
                              "charging_90", "charging_full", "charging_full" ]}
-                             
-  # From my tests:
-  # over 4V => charging
-  # 4.7V => charging and charged 100%
-  # 3.9V => not charging, 100%
-  # 3.2V => will die in 10 mins under load, shut down
-  # 3.3V => warning icon?
 
 class InterfaceState(Enum):
   DISABLED = 0
@@ -135,11 +135,8 @@ def x_position(count):
 
 def translate_bat(voltage):
   # Figure out how 'wide' each range is
-  
-  print(vmax["discharging"])
-  
   state = voltage <= vmax["discharging"] and "discharging" or "charging"
-  print("Battery Is " + state)
+
   leftSpan = vmax[state] - vmin[state]
   rightSpan = len(bat_icons[state]) - 1
 
@@ -294,34 +291,34 @@ def environment():
     "freq-capped": bool(val & 0x02),
     "throttled": bool(val & 0x04)
   }
-  
+
   if(config.get('Detection','HideEnvWarnings') == False):
- 
-      for k,v in env.items():
-        if v and not k in overlay_processes:
-          count += 1
-          overlay_processes[k] = subprocess.Popen(pngview_call + [str(x_position(count)), icons[k]])
-        elif not v and k in overlay_processes:
-          overlay_processes[k].kill()
-          del(overlay_processes[k])
-      return val
+    for k,v in env.items():
+      if v and not k in overlay_processes:
+        count += 1
+        overlay_processes[k] = subprocess.Popen(pngview_call + [str(x_position(count)), icons[k]])
+      elif not v and k in overlay_processes:
+        overlay_processes[k].kill()
+        del(overlay_processes[k])
+
+  return val
 
 def battery(new_ingame):
   global battery_level, overlay_processes, battery_history, count
   
   if config.get('Detection','Type') == 'ADS1':
       value = adc.read_adc(0, gain=2/3)
-      value_v = value * 0.003  
-      value_v = value_v * config.getfloat("Detection", "Multiplier")
-      
+      value_v = value * 0.003
+      #value_v = value_v * config.getfloat("Detection", "Multiplier")
+
   if config.get('Detection','Type') == 'MCP':
       value = adc.read_adc(0)
       value_v = value / 1023.0 * 3.3
       value_v = value_v * config.getfloat("Detection", "Multiplier")
-      
+
   count+=1
-  
-  print("Battery Voltage " + str(value_v))
+
+  my_logger.info("Battery Voltage " + str(value_v))
 
   battery_history.append(value_v)
   try:
@@ -329,7 +326,7 @@ def battery(new_ingame):
   except IndexError:
     level_icon="unknown"
 
-  if value_v <= 3.2:
+  if value_v <= 3.2 and config.getboolean('Detection','ADCShutdown'):
     shutdown(True)
 
   if level_icon != battery_level or new_ingame != ingame:
@@ -372,19 +369,18 @@ def interrupt_shutdown(channel):
         my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
  
 def shutdown(low_voltage):
-  if config.getboolean('Detection','ADCShutdown') == True:
-      if low_voltage :
-        my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
-        if "caution" in overlay_processes:
-          overlay_processes["caution"].kill()
-          del overlay_processes["caution"]
-        
-        overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 60), "-y", str(int(resolution[1]) / 2 - 60), icons["battery_critical_shutdown"]])
-        os.system("sudo shutdown -P +1")
-      else:
-        os.system("sudo shutdown -c")
-        overlay_processes["caution"].kill()
-        my_logger.info("Power Restored, shutdown aborted.")
+  if low_voltage:
+    my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
+    if "caution" in overlay_processes:
+      overlay_processes["caution"].kill()
+      del overlay_processes["caution"]
+    
+    overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 60), "-y", str(int(resolution[1]) / 2 - 60), icons["battery_critical_shutdown"]])
+    os.system("sudo shutdown -P +1")
+  else:
+    os.system("sudo shutdown -c")
+    overlay_processes["caution"].kill()
+    my_logger.info("Power Restored, shutdown aborted.")
 
 GPIO.setmode(GPIO.BCM)
 if config.getboolean('Detection','BatteryLDO'):
@@ -410,12 +406,12 @@ audio_volume = 0
 
 while True:
   count = 0;
-  # Check if retroarch is running
-  
+
   if config.getboolean('Detection','HideInGame'):
+     # Check if retroarch is running
      new_ingame = check_process('retroarch')
   else:
-     new_ingame = False   
+     new_ingame = False
 
   log = str("%s" % (datetime.now()))
   if config.getboolean('Detection','BatteryADC'):
@@ -443,8 +439,7 @@ while True:
     audio_state = audio(new_ingame)
     log = log + str(", Audio: %s %i%%" % (audio_state.name, audio_volume))
   env = environment()
-  if(config.get('Detection','HideEnvWarnings') == False):
-    my_logger.info(log + str(", throttle: %#0x" % (env)))
+  my_logger.info(log + str(", throttle: %#0x" % (env)))
   
   ingame = new_ingame
   time.sleep(5)

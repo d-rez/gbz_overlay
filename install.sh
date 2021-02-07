@@ -15,9 +15,9 @@ cd $SCRIPTPATH
 
 #if not root user, restart script as root
 if [ "$(whoami)" != "root" ]; then
-	echo "Switching to root user..."
-	sudo bash $SCRIPT
-	exit 1
+  echo "Switching to root user..."
+  sudo bash $SCRIPT
+  exit 1
 fi
 
 echo -e "${CYAN}"
@@ -126,87 +126,85 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "Audio = $AUDIO" >> config.ini
   
   echo "Enable Battery Voltage detection using ADC? (Requires specific hardware)"
-  read -p "[Y]es or [N]o: " BATADC
+  read -p "[y]es or [N]o: " BATADC
   if [[ $BATADC = [yY] ]] ; then
     BATADC="True"
   else
     BATADC="False"
   fi
-  
-  
+
+
   echo "BatteryADC = $BATADC" >> config.ini 
   
-  if [[ $BATADC = "True" ]] ; then 
- 
-  
-	  echo "What hardware are you using for ADC?"
-	  read -p "[MCP] or [ADS1]: " CHIPTYPE
-	  if [[ $CHIPTYPE = "MCP" ]] ; then
-		CHIPTYPE="MCP"
-	  else
-		CHIPTYPE="ADS1"
-	  fi
-	  echo "Type = $CHIPTYPE" >> config.ini 
-		
-	  if [[ $CHIPTYPE = "MCP" ]] ; then
-	  echo "GPIO for CLK?"	
-	  read -p "GPIO : " CLK
-	  else
-		CLK=0	
-	  fi
-	  
-	  if [[ $CHIPTYPE = "MCP" ]] ; then
-	  echo "GPIO for MISO?"	
-	  read -p "GPIO : " MISO  
-	  else
-		MISO=0	
-	  fi
-	  
-	  if [[ $CHIPTYPE = "MCP" ]] ; then
-	  echo "GPIO for MOSI?"	
-	  read -p "GPIO: " MOSI  
-	  else
-		MOSI=0	
-	  fi
-	  
-	  if [[ $CHIPTYPE = "MCP" ]] ; then
-	  echo "GPIO for CS?"	
-	  read -p "GPIO : " CS    
-	  else
-		CS=0	
-	  fi
-		
-	  echo "clk = $CLK" >> config.ini 
-	  echo "miso = $MISO" >> config.ini 
-	  echo "mosi = $MOSI" >> config.ini 
-	  echo "cs = $CS" >> config.ini   
+  if [[ $BATADC = "True" ]] ; then
+    echo "Which hardware are you using for ADC?"
+    read -p "[MCP] or [ADS1]: " CHIPTYPE
+    if [[ $CHIPTYPE = "MCP" ]] ; then
+      CHIPTYPE="MCP"
+    else
+      CHIPTYPE="ADS1"
+    fi
+    echo "Type = $CHIPTYPE" >> config.ini
 
-	  echo "ADCShutdown = N" >> config.ini    
-	  
-	  echo "Multiplier = 1" >> config.ini 	
-	  echo "VMaxDischarging = 3.95" >> config.ini 	
-	  echo "VMaxCharging = 4.5" >> config.ini 	
-	  echo "VMinDischarging = 3.2" >> config.ini 		  
- 	  echo "VMinCharging = 4.25" >> config.ini 	
-	  
+    if [[ $CHIPTYPE = "MCP" ]] ; then
+      echo "GPIO for CLK?"
+      read -p "GPIO : " CLK
+    else
+      CLK=0
+    fi
+
+    if [[ $CHIPTYPE = "MCP" ]] ; then
+      echo "GPIO for MISO?"
+      read -p "GPIO : " MISO
+    else
+      MISO=0
+    fi
+
+    if [[ $CHIPTYPE = "MCP" ]] ; then
+      echo "GPIO for MOSI?"
+      read -p "GPIO: " MOSI
+    else
+      MOSI=0
+    fi
+
+    if [[ $CHIPTYPE = "MCP" ]] ; then
+      echo "GPIO for CS?"
+      read -p "GPIO : " CS
+    else
+      CS=0
+    fi
+
+    echo "clk = $CLK" >> config.ini
+    echo "miso = $MISO" >> config.ini
+    echo "mosi = $MOSI" >> config.ini
+    echo "cs = $CS" >> config.ini
+
+    echo "ADCShutdown = N" >> config.ini
+
+    echo "Multiplier = 1" >> config.ini
+    echo "VMaxDischarging = 3.95" >> config.ini
+    echo "VMaxCharging = 4.5" >> config.ini
+    echo "VMinDischarging = 3.2" >> config.ini
+    echo "VMinCharging = 4.25" >> config.ini
+
   fi
-  
-  echo "Enable Low Battery protection using GPIO (LDO)? (Requires specific hardware)"
+
+  echo "Enable Low Battery detection using GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " BATLDO
   if [[ $BATLDO = [yY] ]] ; then
-	BATLDO="True"
-	LDOGPIO=28
-	while [[ "$LDOGPIO" -lt 0 || "$LDOGPIO" -gt 27 ]]
-	do
-	  read -p "LDO GPIO pin [0 - 27]: " LDOGPIO
-	done
-	read -p "LDO GPIO Active [L]ow or Active [h]igh? " LDOPOL
+    BATLDO="True"
+    LDOGPIO=28
+    while [[ "$LDOGPIO" -lt 0 || "$LDOGPIO" -gt 27 ]]
+    do
+      read -p "LDO GPIO pin [0 - 27]: " LDOGPIO
+    done
+    read -p "LDO GPIO Active [L]ow or Active [h]igh? " LDOPOL
   else
-	BATLDO="False"
+    BATLDO="False"
   fi
-  echo "BatteryLDO = $BATLDO" >> config.ini  
+  echo "BatteryLDO = $BATLDO" >> config.ini
 
-  echo "Enable Shutdown via GPIO Button? (Requires specific hardware)"
+  echo "Enable Shutdown via GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
     SD="True"
@@ -221,25 +219,26 @@ if [[ $CONFIG = [bB] ]] ; then
   fi
   echo "ShutdownGPIO = $SD" >> config.ini
   
+  echo "" >> config.ini
   echo "Hide Overlay When In-Game"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
-	EOIG="True"
+    EOIG="True"
   else
     EOIG="False"
   fi
-  echo "HideInGame = $EOIG" >> config.ini  
-  
+  echo "HideInGame = $EOIG" >> config.ini
+
   echo "Hide Env Warnings (Low Voltage, Thermal Throttle etc)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
-	HEW="True"
+    HEW="True"
   else
     HEW="False"
   fi
-  echo "HideEnvWarnings = $HEW" >> config.ini    
-  
-  echo "" >> config.ini 
+  echo "HideEnvWarnings = $HEW" >> config.ini
+
+  echo "" >> config.ini
   echo "[BatteryLDO]" >> config.ini
   echo "GPIO = $LDOGPIO" >> config.ini
   if [[ $LDPOL = [hH] ]] ; then
@@ -248,7 +247,7 @@ if [[ $CONFIG = [bB] ]] ; then
     echo "ActiveLow = True" >> config.ini
   fi
   
-  echo "" >> config.ini  
+  echo "" >> config.ini
 
   echo "[ShutdownGPIO]" >> config.ini 
   echo "GPIO = $SDGPIO" >> config.ini 
@@ -259,6 +258,10 @@ if [[ $CONFIG = [bB] ]] ; then
   fi
   echo "" >> config.ini
   echo "config.ini creation complete"
+else
+  echo "Copying default config.ini"
+  echo "Edit this file after install is complete"
+  cp $SCRIPTPATH/config.ini.example $SCRIPTPATH/config.ini
 fi
 
 echo ""
@@ -295,24 +298,17 @@ echo -e "${NONE}"
 echo "--------------------------------------------------"
 sudo pip3 install Adafruit_ADS1x15
 
-echo ""
-echo -e "${CYAN}"
-echo "Downloading RetroPie Status Overlay"
-echo -e "${NONE}"
-echo "--------------------------------------------------"
-
 cd $SCRIPTPATH
 
 echo -e "${CYAN}"
 echo "Installing As Service..."
 echo -e "${NONE}"
 echo "--------------------------------------------------"
-echo 
 
 servicefile=$SCRIPTPATH"/retropie-status-overlay.service"
 cp $servicefile /lib/systemd/system/
 
-sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' /lib/systemd/system/$servicefile
+sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' /lib/systemd/system/retropie-status-overlay.service
 
 systemctl enable retropie-status-overlay
 service retropie-status-overlay start
@@ -327,7 +323,8 @@ echo "Retropie Status Overlay will now run automatically at boot as a service."
 echo ""
 echo "$SCRIPTPATH/config.ini may be edited at any time."
 echo ""
-echo "You can stop and start the overlay service at anytime by doing sudo service overlay [stop|stop]"
+echo "You can stop and start the overlay service at anytime by doing:"
+echo "sudo service retropie-status-overlay [stop|stop]"
 echo ""
 echo "Use remove.sh at anytime to uninstall Retropie status overlay"
 echo ""
