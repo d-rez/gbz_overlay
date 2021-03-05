@@ -18,6 +18,7 @@ This repository contains a script to display lovely slightly-transparent overlay
 - show a big imminent shutdown warning when the counter starts ticking
 - Only critical icons displayed in game
 - Shutdown from button press
+- Custom icon colours
 
 ## More Screenshots
 

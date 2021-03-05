@@ -52,15 +52,12 @@ if [[ $CONFIG = [bB] ]] ; then
   done
   echo "Size = $PIXEL" >> config.ini
   echo "" >> config.ini
-  echo "# Icon Color: white or black" >> config.ini
-  while [[ "$COLOR" != "white" && "$COLOR" != "black" ]]
+  echo "# Icon Color: 24bit Hex (e.g. 0xff00ff for magenta)" >> config.ini
+  while [[ "$COLOR" != "0x"* ]]
   do
-    echo "Choose icon color"
-    read -p "[b]lack or [W]hite: " COLOR
-    if [[ $COLOR = [bB] ]] ; then
-      COLOR="black"
-    elif [[ $COLOR = [wW] || $COLOR = "" ]] ; then
-      COLOR="white"
+    read -p "Icon color (24bit hex) [0x7d7d7d]: " COLOR
+    if [[ $COLOR = "" ]] ; then
+      COLOR="0x7d7d7d"
     fi
   done
   echo "Color = $COLOR" >> config.ini
