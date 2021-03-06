@@ -247,15 +247,13 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "ShutdownGPIO = $SD" >> config.ini
   echo "" >> config.ini
 
-  echo "# Hide Overlay when In-Game" >> config.ini
-  echo "Hide Overlay When In-Game"
-  read -p "[y]es or [N]o: " SD
-  if [[ $SD = [yY] ]] ; then
-    EOIG="True"
-  else
-    EOIG="False"
-  fi
-  echo "HideInGame = $EOIG" >> config.ini
+  echo "# Transparency of icons in game" >> config.ini
+  echo "Transparency of icons when in game"
+  while [[ "EOIG" -lt 0 || "$EOIG" -gt 255 ]]
+  do
+    read -p "0% - 100% [0-255] : " EOIG
+  done
+  echo "InGameAlpha = $EOIG" >> config.ini
   echo "" >> config.ini
 
   echo "# Hide Any Environment Warnings, such as temperature" >> config.ini

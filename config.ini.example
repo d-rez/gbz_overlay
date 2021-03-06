@@ -59,8 +59,8 @@ BatteryLDO = False
 # Do you have a GPIO Pin you wish to use for shutdown
 ShutdownGPIO = False
 
-# Hide Overlay when In-Game
-HideInGame = False
+# Transparency of icons in game
+InGameAlpha = 100
 
 # Hide Any Environment Warnings, such as temperature
 HideEnvWarnings = False

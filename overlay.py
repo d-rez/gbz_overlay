@@ -44,8 +44,16 @@ pngview_path="/usr/local/bin/pngview"
 y_position = config['Icons']['Padding']
 if config['Icons']['Vertical'] == "bottom":
   y_position = str(int(resolution[1]) - int(config['Icons']['Size']) - int(config['Icons']['Padding']))
-pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", y_position, "-x"]
-pngview_call_recolor=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-c", config['Icons']['Color'], "-y", y_position, "-x"]
+
+def pngview_call(x, y, icon, alpha=255, color=None):
+  pngview_call=[pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
+  if int(alpha) < 255:
+    pngview_call += ["-a", str(alpha)]
+  if color is not None:
+    pngview_call += ["-c", color]
+  pngview_call += [icon]
+  
+  return pngview_call
 
 icons = {
   "under-voltage": iconpath + "flash_" + config['Icons']['Size'] + ".png",
@@ -188,25 +196,25 @@ def wifi(new_ingame):
     pass
 
   if new_wifi_state != wifi_state or new_ingame != ingame:
+  
     if "wifi" in overlay_processes:
       overlay_processes["wifi"].kill()
       del overlay_processes["wifi"]
     
-    if not new_ingame:
-      if new_wifi_state == InterfaceState.ENABLED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_0"]])
-      elif new_wifi_state == InterfaceState.DISABLED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_off"]])
-      elif new_wifi_state == InterfaceState.CONNECTED:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_4"]])
-      elif new_wifi_state == InterfaceState.CONNECTED_3:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_3"]])
-      elif new_wifi_state == InterfaceState.CONNECTED_2:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_2"]])
-      elif new_wifi_state == InterfaceState.CONNECTED_1:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_1"]])
-      elif new_wifi_state == InterfaceState.CONNECTED_0:
-        overlay_processes["wifi"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["wifi_0"]])
+    if new_wifi_state == InterfaceState.ENABLED:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_0"], alpha, config['Icons']['Color']))
+    elif new_wifi_state == InterfaceState.DISABLED:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_off"], alpha, config['Icons']['Color']))
+    elif new_wifi_state == InterfaceState.CONNECTED:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_4"], alpha, config['Icons']['Color']))
+    elif new_wifi_state == InterfaceState.CONNECTED_3:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_3"], alpha, config['Icons']['Color']))
+    elif new_wifi_state == InterfaceState.CONNECTED_2:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_2"], alpha, config['Icons']['Color']))
+    elif new_wifi_state == InterfaceState.CONNECTED_1:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_1"], alpha, config['Icons']['Color']))
+    elif new_wifi_state == InterfaceState.CONNECTED_0:
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_0"], alpha, config['Icons']['Color']))
   return new_wifi_state
 
 def audio(new_ingame):
@@ -236,15 +244,14 @@ def audio(new_ingame):
       overlay_processes["audio"].kill()
       del overlay_processes["audio"]
 
-    if not new_ingame:
-      if new_audio_state == InterfaceState.ENABLED:
-        overlay_processes["audio"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["volume_0"]])
-      elif new_audio_state == InterfaceState.DISABLED:
-        overlay_processes["audio"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["volume_mute"]])
-      elif new_audio_state == InterfaceState.CONNECTED_1:
-        overlay_processes["audio"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["volume_2"]])
-      elif new_audio_state == InterfaceState.CONNECTED_0:
-        overlay_processes["audio"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["volume_1"]])
+    if new_audio_state == InterfaceState.ENABLED:
+      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_0"], alpha, config['Icons']['Color']))
+    elif new_audio_state == InterfaceState.DISABLED:
+      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_mute"], alpha, config['Icons']['Color']))
+    elif new_audio_state == InterfaceState.CONNECTED_1:
+      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_2"], alpha, config['Icons']['Color']))
+    elif new_audio_state == InterfaceState.CONNECTED_0:
+      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_1"], alpha, config['Icons']['Color']))
   
   return new_audio_state
 
@@ -274,13 +281,12 @@ def bluetooth(new_ingame):
       overlay_processes["bt"].kill()
       del overlay_processes["bt"]
 
-    if not new_ingame:
-      if new_bt_state == InterfaceState.CONNECTED:
-        overlay_processes["bt"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["bt_connected"]])
-      elif new_bt_state == InterfaceState.ENABLED:
-        overlay_processes["bt"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["bt_enabled"]])
-      elif new_bt_state == InterfaceState.DISABLED:
-        overlay_processes["bt"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), icons["bt_disabled"]])
+    if new_bt_state == InterfaceState.CONNECTED:
+      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["bt_connected"], alpha, config['Icons']['Color']))
+    elif new_bt_state == InterfaceState.ENABLED:
+      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["bt_enabled"], alpha, config['Icons']['Color']))
+    elif new_bt_state == InterfaceState.DISABLED:
+      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["bt_disabled"], alpha, config['Icons']['Color']))
   return new_bt_state
 
 def environment():
@@ -297,7 +303,7 @@ def environment():
     for k,v in env.items():
       if v and not k in overlay_processes:
         count += 1
-        overlay_processes[k] = subprocess.Popen(pngview_call + [str(x_position(count)), icons[k]])
+        overlay_processes[k] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[k]), alpha)
       elif not v and k in overlay_processes:
         overlay_processes[k].kill()
         del(overlay_processes[k])
@@ -338,8 +344,7 @@ def battery(new_ingame):
     bat_iconpath = iconpath + "ic_battery_" + level_icon + "_black_" + config['Icons']['Size'] + "dp.png"
     if (level_icon == "alert_red"):
       bat_iconpath = iconpath + "battery-alert_" + config['Icons']['Size'] + ".png"
-    elif not new_ingame:
-      overlay_processes["bat"] = subprocess.Popen(pngview_call_recolor + [str(x_position(count)), bat_iconpath])
+    overlay_processes["bat"] = subprocess.Popen(pngview_call(x_position(count), y_position, bat_iconpath, alpha, config['Icons']['Color']))
   return (level_icon, value_v)
 
 def check_process(process):
@@ -376,7 +381,7 @@ def shutdown(low_voltage):
       overlay_processes["caution"].kill()
       del overlay_processes["caution"]
     
-    overlay_processes["caution"] = subprocess.Popen(pngview_call + [str(int(resolution[0]) / 2 - 60), "-y", str(int(resolution[1]) / 2 - 60), icons["battery_critical_shutdown"]])
+    overlay_processes["caution"] = subprocess.Popen(pngview_call(int(resolution[0]) / 2 - 60, int(resolution[1]) / 2 - 60, icons["battery_critical_shutdown"]))
     os.system("sudo shutdown -P +1")
   else:
     os.system("sudo shutdown -c")
@@ -406,13 +411,15 @@ battery_history = deque(maxlen=5)
 audio_volume = 0
 
 while True:
-  count = 0;
-
-  if config.getboolean('Detection','HideInGame'):
-     # Check if retroarch is running
-     new_ingame = check_process('retroarch')
+  count = 0
+  
+  # Check if retroarch is running
+  new_ingame = check_process('retroarch')
+  
+  if new_ingame:
+    alpha = config['Detection']['InGameAlpha']
   else:
-     new_ingame = False
+    alpha = "255";
 
   log = str("%s" % (datetime.now()))
   if config.getboolean('Detection','BatteryADC'):

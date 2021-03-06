@@ -16,7 +16,7 @@ This repository contains a script to display lovely slightly-transparent overlay
 - display warning if throttling
 - gracefully shut down the Pi after 60s from when voltage goes below 3.2V of low voltage detected (abort shutdown when power is restored)
 - show a big imminent shutdown warning when the counter starts ticking
-- Only critical icons displayed in game
+- Set icon transparency while in game
 - Shutdown from button press
 - Custom icon colours
 
