@@ -41,13 +41,13 @@ SSH into your device, or access the terminal using F4.
 ## Run RetroPie Status Overlay
 
     cd ~
-    git clone https://github.com/bverc/retropie_status_overlay
-    cd retropie_status_overlay
+    git clone https://github.com/bverc/retropie-status-overlay
+    cd retropie-status-overlay
     sudo bash install.sh
 
 ## Follow the onscreen instructions
 
-retropie_status_overlay will run as a service automatically at boot, and is called "retropie-status-overlay"
+retropie-status-overlay will run as a service automatically at boot, and is called "retropie-status-overlay"
 
 You can stop and start this service by running
 
@@ -68,7 +68,7 @@ SSH into your device, or access the terminal using F4.
     make
     sudo cp pngview /usr/local/bin/
   
-  Note: AndrewFromMelbourne/raspidmx has been replaced with bverc/raspidmx due to added features required by retropie_status_overlay. Will be changed back pending [pull request](https://github.com/AndrewFromMelbourne/raspidmx/pull/31).
+  Note: AndrewFromMelbourne/raspidmx has been replaced with bverc/raspidmx due to added features required by retropie-status-overlay. Will be changed back pending [pull request](https://github.com/AndrewFromMelbourne/raspidmx/pull/31).
 	
 ## Run RetroPie Status Overlay
 Install psutil module:
@@ -77,11 +77,11 @@ Install psutil module:
 Download the code:
 
     cd ~/src
-    git clone https://github.com/bverc/retropie_status_overlay
-    cp retropie_status_overlay/config.ini.example retropie_status_overlay/config.ini
+    git clone https://github.com/bverc/retropie-status-overlay
+    cp retropie-status-overlay/config.ini.example retropie-status-overlay/config.ini
 Test the code:
 
-    python3 retropie_status_overlay/overlay.py
+    python3 retropie-status-overlay/overlay.py
 You should see the overlay added to your interface
 
 Now to get it to  run at boot:
@@ -90,6 +90,6 @@ Now to get it to  run at boot:
     
 At the bottom of the file, add the line:
 
-    @reboot python3 /home/pi/src/retropie_status_overlay/overlay.py
+    @reboot python3 /home/pi/src/retropie-status-overlay/overlay.py
 
 reboot
