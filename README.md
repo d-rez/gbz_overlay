@@ -93,3 +93,15 @@ At the bottom of the file, add the line:
     @reboot python3 /home/pi/src/retropie-status-overlay/overlay.py
 
 reboot
+
+## (Optional) Script to Toggle Status Overlay in retropiemenu
+Copy shell script to retropiemenu:
+
+    cd ~/src
+    cp retropie-status-overlay/toggle\ status\ overlay.sh ~/RetroPie/retropiemenu/
+Make script executable:
+
+    cd ~/RetroPie/retropiemenu
+    chmod +x toggle\ status\ overlay.sh
+
+You can now toggle the overlay on and off from the RetroPie menu.
