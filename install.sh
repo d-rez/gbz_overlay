@@ -228,7 +228,7 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "BatteryLDO = $BATLDO" >> config.ini
   echo "" >> config.ini
 
-  echp "# Do you have a GPIO Pin you wish to use for shutdown" >> config.ini
+  echo "# Do you have a GPIO Pin you wish to use for shutdown" >> config.ini
   echo "Enable Shutdown via GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
@@ -339,6 +339,14 @@ sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' /lib/systemd/system/retropie-stat
 
 systemctl enable retropie-status-overlay
 service retropie-status-overlay start
+
+echo "Add overlay toggle script to retropiemenu?"
+read -p "[y]es or [N]o: " TOGGLE
+if [[ $TOGGLE = [yY] ]] ; then
+  cp $SCRIPTPATH"/toggle status overlay.sh" ~/RetroPie/retropiemenu
+  cd ~/RetroPie/retropiemenu
+  chmod +x toggle\ status\ overlay.sh
+fi
 
 echo ""
 echo "--------------------------------------------------"
