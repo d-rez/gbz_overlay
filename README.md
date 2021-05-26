@@ -69,7 +69,7 @@ SSH into your device, or access the terminal using F4.
     sudo cp pngview /usr/local/bin/
   
   Note: AndrewFromMelbourne/raspidmx has been replaced with bverc/raspidmx due to added features required by retropie-status-overlay. Will be changed back pending [pull request](https://github.com/AndrewFromMelbourne/raspidmx/pull/31).
-	
+  
 ## Run RetroPie Status Overlay
 Install psutil module:
 
@@ -78,10 +78,20 @@ Download the code:
 
     cd ~/src
     git clone https://github.com/bverc/retropie-status-overlay
-    cp retropie-status-overlay/config.ini.example retropie-status-overlay/config.ini
+    cd retropie-status-overlay
+    cp config.ini.example config.ini
+    
+Colorize Icons:
+
+    sudo apt-get install imagemagick
+    cp -r overlay_icons colored_icons
+    mogrify -fill "#7d7d7d" -colorize 100 colored_icons/*black*.png
+Replace "#7d7d7d" with preffered color in HEX in quotes or as a word (e.g. blue) without quotes
+
 Test the code:
 
-    python3 retropie-status-overlay/overlay.py
+    python3 overlay.py
+
 You should see the overlay added to your interface
 
 Now to get it to  run at boot:

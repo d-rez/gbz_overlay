@@ -102,3 +102,5 @@ ENV/
 
 # Retropie Status Overlay
 config.ini
+colored_icons/
+raspidmx/

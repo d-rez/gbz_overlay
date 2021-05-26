@@ -52,16 +52,6 @@ if [[ $CONFIG = [bB] ]] ; then
   done
   echo "Size = $PIXEL" >> config.ini
   echo "" >> config.ini
-  echo "# Icon Color: 24bit Hex (e.g. 0xff00ff for magenta)" >> config.ini
-  while [[ "$COLOR" != "0x"* ]]
-  do
-    read -p "Icon color (24bit hex) [0x7d7d7d]: " COLOR
-    if [[ $COLOR = "" ]] ; then
-      COLOR="0x7d7d7d"
-    fi
-  done
-  echo "Color = $COLOR" >> config.ini
-  echo "" >> config.ini
   echo "# Horizontal Position: left or right" >> config.ini
   while [[ "$XPOS" != "left" && "$XPOS" != "right" ]]
   do
@@ -309,7 +299,7 @@ echo -e "${CYAN}"
 echo "Installing required packages..."
 echo -e "${NONE}"
 echo "--------------------------------------------------"
-sudo apt-get install python3-psutil python3-rpi.gpio python3-pip
+sudo apt-get install python3-psutil python3-rpi.gpio python3-pip imagemagick
 
 echo ""
 echo -e "${CYAN}"
@@ -324,6 +314,22 @@ echo "Installing ADS1 Adafruit..."
 echo -e "${NONE}"
 echo "--------------------------------------------------"
 sudo pip3 install Adafruit_ADS1x15
+
+echo ""
+echo -e "${CYAN}"
+echo "Colorize Icons"
+echo -e "${NONE}"
+echo "--------------------------------------------------"
+read -p "Icon color (24bit hex) [#7d7d7d]: " COLOR
+if [[ $COLOR = "" ]] ; then
+  COLOR="#7d7d7d"
+fi
+cd $SCRIPTPATH
+cp -r overlay_icons colored_icons
+echo "Colorizing icons using Imagemagick..."
+mogrify -define png:color-type=6 -fill $COLOR -colorize 100 colored_icons/*black*.png
+ 
+
 
 cd $SCRIPTPATH
 
