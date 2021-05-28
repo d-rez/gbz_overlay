@@ -13,13 +13,6 @@ UNDERLINE='\033[4m'
 
 cd $SCRIPTPATH
 
-#if not root user, restart script as root
-if [ "$(whoami)" != "root" ]; then
-  echo "Switching to root user..."
-  sudo bash $SCRIPT
-  exit 1
-fi
-
 echo -e "${CYAN}"
 echo -e "Starting installation of Retropie Status Overlay"
 echo -e "${NONE}"
@@ -339,12 +332,12 @@ echo -e "${NONE}"
 echo "--------------------------------------------------"
 
 servicefile=$SCRIPTPATH"/retropie-status-overlay.service"
-cp $servicefile /lib/systemd/system/
+sudo cp $servicefile /lib/systemd/system/
 
-sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' /lib/systemd/system/retropie-status-overlay.service
+sudo sed -i 's@WORKING_DIRECTORY@'"$SCRIPTPATH"'@g' /lib/systemd/system/retropie-status-overlay.service
 
-systemctl enable retropie-status-overlay
-service retropie-status-overlay start
+sudo systemctl enable retropie-status-overlay
+sudo service retropie-status-overlay start
 
 echo "Add overlay toggle script to retropiemenu?"
 read -p "[y]es or [N]o: " TOGGLE
