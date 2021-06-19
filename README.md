@@ -52,9 +52,9 @@ SSH into your device or access the terminal using F4. We're assuming you already
 ### 1. Install pngview by AndrewFromMelbourne
     mkdir ~/src && cd ~/src
     git clone --depth 1 https://github.com/AndrewFromMelbourne/raspidmx.git
-    cd raspidmx/pngview
-    make
-    sudo cp pngview /usr/local/bin/
+    cd raspidmx/
+    make -j4
+    sudo cp pngview/pngview /usr/local/bin/
 
 ### 2. Download Material Design Icons by Google
     cd ~/src
