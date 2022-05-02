@@ -40,7 +40,7 @@ Run RetroPie Status Overlay
 cd ~
 git clone https://github.com/bverc/retropie-status-overlay
 cd retropie-status-overlay
-sudo bash install.sh
+bash install.sh
 ```
 Follow the onscreen instructions
 
