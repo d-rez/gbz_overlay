@@ -292,6 +292,7 @@ echo -e "${CYAN}"
 echo "Installing required packages..."
 echo -e "${NONE}"
 echo "--------------------------------------------------"
+sudo apt-get update
 sudo apt-get install python3-psutil python3-rpi.gpio python3-pip imagemagick
 
 echo ""
