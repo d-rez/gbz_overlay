@@ -50,8 +50,6 @@ def pngview_call(x, y, icon, alpha=255):
     pngview_call += ["-a", str(alpha)]
   pngview_call += [icon]
   
-  print(pngview_call)
-  
   return pngview_call
 
 icons = {
