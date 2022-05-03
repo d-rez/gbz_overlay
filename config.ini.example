@@ -28,18 +28,15 @@ Audio = True
 BatteryADC = False
 
 # Which chip are you using for ADC (Only applies if BatteryADC=True)
-# MCP  : MCP3008
-# ADS1 : ADS1x15
-Type = MCP
+# MCP3008
+# ADS1015
+ADCType = ADS1015
 
-# If MCP what are you SPI Pins
-clk = 11
-miso = 9
-mosi = 10
-cs = 8
+# Gain for ADC Voltage. Adjust if dividing voltage before ADC input
+ADCGain = 1.0
 
-# Multiplier for ADC Number, See Read Me
-Multiplier = 1.54
+# ADC Channel for ADCs which have multiple channels
+ADCChannel = 0
 
 # Change how your battery calculations are made, See Read Me
 VMaxDischarging = 4

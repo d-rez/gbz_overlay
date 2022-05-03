@@ -79,42 +79,13 @@ env_cmd="vcgencmd get_throttled"
 
 
 if config.getboolean('Detection','BatteryADC'):
-  if config.get('Detection','Type') == 'MCP':
-      import Adafruit_MCP3008
-      adc = Adafruit_MCP3008.MCP3008(clk=config.getint('Detection','clk'), cs=config.getint('Detection','cs'), miso=config.getint('Detection','miso'), mosi=config.getint('Detection','mosi'))
-
-      vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
-              "charging"   : config.getfloat("Detection", "VMaxCharging") }
-      vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
-              "charging"   : config.getfloat("Detection", "VMinCharging") }
-
-  if config.get('Detection','Type') == 'ADS1':
-      import Adafruit_ADS1x15
-      adc = Adafruit_ADS1x15.ADS1015()
-      # Choose a gain of 1 for reading voltages from 0 to 4.09V.
-      # Or pick a different gain to change the range of voltages that are read:
-      #  - 2/3 = +/-6.144V
-      #  -   1 = +/-4.096V
-      #  -   2 = +/-2.048V
-      #  -   4 = +/-1.024V
-      #  -   8 = +/-0.512V
-      #  -  16 = +/-0.256V
-      # See table 3 in the ADS1015i/ADS1115 datasheet for more info on gain.
-
-      #charging no load: 4.85V max (full bat)
-      #charging es load: 4.5V max
-
-      # From my (d-rez) tests:
-      # over 4V => charging
-      # 4.7V => charging and charged 100%
-      # 3.9V => not charging, 100%
-      # 3.2V => will die in 10 mins under load, shut down
-      # 3.3V => warning icon?
-
-      vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
-              "charging"   : config.getfloat("Detection", "VMaxCharging") }
-      vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
-              "charging"   : config.getfloat("Detection", "VMinCharging") }
+  import importlib
+  adc = importlib.import_module('adc.' + config.get('Detection','ADCType').lower())
+  
+  vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
+          "charging"   : config.getfloat("Detection", "VMaxCharging") }
+  vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
+          "charging"   : config.getfloat("Detection", "VMinCharging") }
 
   bat_icons = { "discharging": [ "alert_red", "alert", "20", "30", "30", "50", "60",
                              "60", "80", "90", "full", "full" ],
@@ -310,15 +281,7 @@ def environment():
 def battery(new_ingame):
   global battery_level, overlay_processes, battery_history, count
   
-  if config.get('Detection','Type') == 'ADS1':
-      value = adc.read_adc(0, gain=2/3)
-      value_v = value * 0.003
-      #value_v = value_v * config.getfloat("Detection", "Multiplier")
-
-  if config.get('Detection','Type') == 'MCP':
-      value = adc.read_adc(0)
-      value_v = value / 1023.0 * 3.3
-      value_v = value_v * config.getfloat("Detection", "Multiplier")
+  value_v = adc.read(config.getint("Detection", "ADCChannel")) * config.getfloat("Detection", "ADCGain")
 
   count+=1
 
