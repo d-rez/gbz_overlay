@@ -30,7 +30,8 @@ BatteryADC = False
 # Which chip are you using for ADC (Only applies if BatteryADC=True)
 # MCP3008
 # ADS1015
-ADCType = ADS1015
+# PJ (PiJuice or PiJuice Zero)
+ADCType = PJ
 
 # Gain for ADC Voltage. Adjust if dividing voltage before ADC input
 ADCGain = 1.0
