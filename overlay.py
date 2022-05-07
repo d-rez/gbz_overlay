@@ -291,7 +291,7 @@ def battery(new_ingame):
   try:
     level_icon=translate_bat(median(battery_history))
   except IndexError:
-    level_icon="unknown"
+    level_icon="alert_red"
 
   if config.getboolean('Detection','ADCShutdown'):
     if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
