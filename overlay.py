@@ -279,7 +279,7 @@ def environment():
   return val
 
 def battery(new_ingame):
-  global battery_level, overlay_processes, battery_history, count
+  global battery_level, overlay_processes, battery_history, shutdown_pending, count
   
   value_v = adc.read(config.getint("Detection", "ADCChannel")) * config.getfloat("Detection", "ADCGain")
 
@@ -293,8 +293,13 @@ def battery(new_ingame):
   except IndexError:
     level_icon="unknown"
 
-  if value_v <= 3.2 and config.getboolean('Detection','ADCShutdown'):
-    shutdown(True)
+  if config.getboolean('Detection','ADCShutdown'):
+    if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
+      shutdown(False)
+      shutdown_pending = False
+    elif value_v < config.getfloat("Detection", "VMinDischarging"):
+      shutdown(True)
+      shutdown_pending = True
 
   if level_icon != battery_level or new_ingame != ingame:
     if "bat" in overlay_processes:
@@ -369,6 +374,7 @@ ingame = None
 value_v = None
 battery_history = deque(maxlen=5)
 audio_volume = 0
+shutdown_pending = False
 
 while True:
   count = 0
