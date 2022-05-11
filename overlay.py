@@ -16,7 +16,6 @@ from RPi import GPIO
 from datetime import datetime
 from statistics import median
 from collections import deque
-from enum import Enum
 
 # Load Configuration
 config = configparser.ConfigParser()
@@ -93,16 +92,6 @@ if config.getboolean('Detection','BatteryADC'):
                              "charging_30", "charging_30", "charging_50",
                              "charging_60", "charging_60", "charging_80",
                              "charging_90", "charging_full", "charging_full" ]}
-
-class InterfaceState(Enum):
-  DISABLED = 0
-  ENABLED = 1
-  CONNECTED = 2
-  CONNECTED_3 = 3
-  CONNECTED_2 = 4
-  CONNECTED_1 = 5
-  CONNECTED_0 = 6
-  
   
 def x_position(count):
   if config['Icons']['Horizontal'] == "right":
@@ -127,14 +116,15 @@ def wifi(new_ingame):
   global wifi_state, ingame, overlay_processes, count, wifi_quality
 
   count += 1
-  new_wifi_state = InterfaceState.DISABLED
+  new_wifi_state = "wifi_off"
+  wifi_quality = 0
   try:
     f = open(wifi_carrier, "r")
     carrier_state = int(f.read().rstrip())
     f.close()
     if carrier_state == 1:
       # ifup and connected to AP
-      new_wifi_state = InterfaceState.CONNECTED
+      new_wifi_state = "wifi_4"
       # get wifi quality
       cmd = subprocess.Popen(["iwconfig", "wlan0"], stdout=subprocess.PIPE)
       for line in cmd.stdout:
@@ -142,54 +132,39 @@ def wifi(new_ingame):
           x = line.split()[1].split(b"=")[1].split(b"/")
           wifi_quality = int(100*int(x[0])/int(x[1]))
           if wifi_quality < 20:
-            new_wifi_state = InterfaceState.CONNECTED_0
+            new_wifi_state = "wifi_0"
           elif wifi_quality < 40:
-            new_wifi_state = InterfaceState.CONNECTED_1
+            new_wifi_state = "wifi_1"
           elif wifi_quality < 60:
-            new_wifi_state = InterfaceState.CONNECTED_2
+            new_wifi_state = "wifi_2"
           elif wifi_quality < 80:
-            new_wifi_state = InterfaceState.CONNECTED_3
+            new_wifi_state = "wifi_3"
           else:
-            new_wifi_state = InterfaceState.CONNECTED
+            new_wifi_state = "wifi_4"
     elif carrier_state == 0:
       f = open(wifi_linkmode, "r")
       linkmode_state = int(f.read().rstrip())
       f.close()
       if linkmode_state == 1:
         # ifup but not connected to any network
-        new_wifi_state = InterfaceState.ENABLED
+        new_wifi_state = "wifi_0"
         # else - must be ifdown
       
   except IOError:
     pass
 
-  if new_wifi_state != wifi_state or new_ingame != ingame:
-  
+  if new_wifi_state != wifi_state or new_ingame != ingame:  
     if "wifi" in overlay_processes:
       overlay_processes["wifi"].kill()
       del overlay_processes["wifi"]
-    
-    if new_wifi_state == InterfaceState.ENABLED:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_0"], alpha))
-    elif new_wifi_state == InterfaceState.DISABLED:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_off"], alpha))
-    elif new_wifi_state == InterfaceState.CONNECTED:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_4"], alpha))
-    elif new_wifi_state == InterfaceState.CONNECTED_3:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_3"], alpha))
-    elif new_wifi_state == InterfaceState.CONNECTED_2:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_2"], alpha))
-    elif new_wifi_state == InterfaceState.CONNECTED_1:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_1"], alpha))
-    elif new_wifi_state == InterfaceState.CONNECTED_0:
-      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["wifi_0"], alpha))
+    overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_wifi_state], alpha))
   return new_wifi_state
 
 def audio(new_ingame):
   global audio_state, ingame, overlay_processes, count, audio_volume
 
   count += 1
-  new_audio_state = InterfaceState.DISABLED
+  new_audio_state = "volume_mute"
   try:
     cmd = subprocess.Popen('amixer', stdout=subprocess.PIPE)
     for line in cmd.stdout:
@@ -197,11 +172,11 @@ def audio(new_ingame):
         if line.split(b"[")[3].split(b"]")[0] == b"on":
           audio_volume = int(line.split(b"[")[1].split(b"%")[0])
           if audio_volume == 0:
-            new_audio_state = InterfaceState.ENABLED
+            new_audio_state = "volume_0"
           elif audio_volume < 50:
-            new_audio_state = InterfaceState.CONNECTED_0
+            new_audio_state = "volume_1"
           else:
-            new_audio_state = InterfaceState.CONNECTED_1
+            new_audio_state = "volume_2"
         break
 
   except IOError:
@@ -211,15 +186,7 @@ def audio(new_ingame):
     if "audio" in overlay_processes:
       overlay_processes["audio"].kill()
       del overlay_processes["audio"]
-
-    if new_audio_state == InterfaceState.ENABLED:
-      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_0"], alpha))
-    elif new_audio_state == InterfaceState.DISABLED:
-      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_mute"], alpha))
-    elif new_audio_state == InterfaceState.CONNECTED_1:
-      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_2"], alpha))
-    elif new_audio_state == InterfaceState.CONNECTED_0:
-      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["volume_1"], alpha))
+    overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_audio_state], alpha))
   
   return new_audio_state
 
@@ -227,20 +194,20 @@ def bluetooth(new_ingame):
   global bt_state, overlay_processes, count
 
   count += 1
-  new_bt_state = InterfaceState.DISABLED
+  new_bt_state = "bt_disabled"
   try:
     p1 = subprocess.Popen('hciconfig', stdout = subprocess.PIPE)
     p2 = subprocess.Popen(['awk', 'FNR == 3 {print tolower($1)}'], stdin = p1.stdout, stdout=subprocess.PIPE)
     state=p2.communicate()[0].decode().rstrip()
     if state == "up":
-      new_bt_state = InterfaceState.ENABLED
+      new_bt_state = "bt_enabled"
   except IOError:
     pass
 
   try:
     devices=os.listdir(bt_devices_dir)
     if len(devices) > 1:
-      new_bt_state = InterfaceState.CONNECTED
+      new_bt_state = "bt_connected"
   except OSError:
     pass
 
@@ -248,13 +215,7 @@ def bluetooth(new_ingame):
     if "bt" in overlay_processes:
       overlay_processes["bt"].kill()
       del overlay_processes["bt"]
-
-    if new_bt_state == InterfaceState.CONNECTED:
-      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["bt_connected"], alpha))
-    elif new_bt_state == InterfaceState.ENABLED:
-      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["bt_enabled"], alpha))
-    elif new_bt_state == InterfaceState.DISABLED:
-      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons["bt_disabled"], alpha))
+    overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_bt_state], alpha))
   return new_bt_state
 
 def environment():
@@ -397,21 +358,16 @@ while True:
     ))
   if config.getboolean('Detection','Wifi'):
     wifi_state = wifi(new_ingame)
-    if wifi_state == InterfaceState.CONNECTED:
-      log = log + str(", wifi: %s %i%%" % (
-        wifi_state.name,
-        wifi_quality
-      ))
-    else:
-      log = log + str(", wifi: %s" % (
-        wifi_state.name
-      ))
+    log = log + str(", wifi: %s %i%%" % (
+      wifi_state,
+      wifi_quality
+    ))
   if config.getboolean('Detection','Bluetooth'):
     bt_state = bluetooth(new_ingame)
-    log = log + str(", bt: %s" % (bt_state.name))
+    log = log + str(", bt: %s" % (bt_state))
   if config.getboolean('Detection', 'Audio'):
     audio_state = audio(new_ingame)
-    log = log + str(", Audio: %s %i%%" % (audio_state.name, audio_volume))
+    log = log + str(", Audio: %s %i%%" % (audio_state, audio_volume))
   env = environment()
   my_logger.info(log + str(", throttle: %#0x" % (env)))
   
