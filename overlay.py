@@ -17,9 +17,7 @@ from datetime import datetime
 from statistics import median
 from collections import deque
 
-import devices.wifi
-import devices.bluetooth
-import devices.audio
+from devices import *
 
 # Load Configuration
 config = configparser.ConfigParser()
@@ -61,9 +59,9 @@ icons = {
   "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
   "battery_critical_shutdown": iconpath + "battery-alert_120.png",
 }
-devices.wifi.icons(icons, iconpath, config['Icons']['Size'])
-devices.bluetooth.icons(icons, iconpath, config['Icons']['Size'])
-devices.audio.icons(icons, iconpath, config['Icons']['Size'])
+wifi.icons(icons, iconpath, config['Icons']['Size'])
+bluetooth.icons(icons, iconpath, config['Icons']['Size'])
+audio.icons(icons, iconpath, config['Icons']['Size'])
 
 env_cmd="vcgencmd get_throttled"
 
@@ -118,9 +116,8 @@ def environment():
       if v and not k in overlay_processes:
         count += 1
         overlay_processes[k] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[k]), alpha)
-      elif not v and k in overlay_processes:
-        overlay_processes[k].kill()
-        del(overlay_processes[k])
+      elif not v:
+        kill_overlay_process(k)
 
   return val
 
@@ -148,9 +145,7 @@ def battery(new_ingame):
       shutdown_pending = True
 
   if level_icon != battery_level or new_ingame != ingame:
-    if "bat" in overlay_processes:
-      overlay_processes["bat"].kill()
-      del overlay_processes["bat"]
+    kill_overlay_process("bat")
     
     bat_iconpath = iconpath + "ic_battery_" + level_icon + "_black_" + config['Icons']['Size'] + "dp.png"
     if (level_icon == "alert_red"):
@@ -168,7 +163,11 @@ def check_process(process):
     except (psutil.NoSuchProcess, psutil.AccessDenied, psutil.ZombieProcess):
       pass
   return False;
-  
+
+def kill_overlay_process(device):
+  if device in overlay_processes:
+    overlay_processes[device].kill()
+    del overlay_processes[device]
   
 def interrupt_shutdown(channel):
   if channel == int(config['BatteryLDO']['GPIO']):
@@ -186,17 +185,13 @@ def interrupt_shutdown(channel):
         my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
  
 def shutdown(low_voltage):
+  kill_overlay_process("caution")
   if low_voltage:
     my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
-    if "caution" in overlay_processes:
-      overlay_processes["caution"].kill()
-      del overlay_processes["caution"]
-    
     overlay_processes["caution"] = subprocess.Popen(pngview_call(int(resolution[0]) / 2 - 60, int(resolution[1]) / 2 - 60, icons["battery_critical_shutdown"]))
     os.system("sudo shutdown -P +1")
   else:
     os.system("sudo shutdown -c")
-    overlay_processes["caution"].kill()
     my_logger.info("Power Restored, shutdown aborted.")
 
 GPIO.setmode(GPIO.BCM)
@@ -248,11 +243,9 @@ while True:
   # Wifi Icon
   if config.getboolean('Detection','Wifi'):
     count += 1
-    (new_wifi_state, wifi_quality) = devices.wifi.get_state()
+    (new_wifi_state, wifi_quality) = wifi.get_state()
     if new_wifi_state != wifi_state or new_ingame != ingame:  
-      if "wifi" in overlay_processes:
-        overlay_processes["wifi"].kill()
-        del overlay_processes["wifi"]
+      kill_overlay_process("wifi")
       overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_wifi_state], alpha))
       wifi_state = new_wifi_state
     log = log + str(", wifi: %s %i%%" % (
@@ -263,11 +256,9 @@ while True:
   # Bluetooth Icon
   if config.getboolean('Detection','Bluetooth'):
     count += 1
-    new_bt_state = devices.bluetooth.getstate()
+    new_bt_state = bluetooth.getstate()
     if new_bt_state != bt_state or new_ingame != ingame:
-      if "bt" in overlay_processes:
-        overlay_processes["bt"].kill()
-        del overlay_processes["bt"]
+      kill_overlay_process("bt")
       overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_bt_state], alpha))
       bt_state = new_bt_state
     log = log + str(", bt: %s" % (bt_state))
@@ -275,11 +266,9 @@ while True:
   # Audio Icon
   if config.getboolean('Detection', 'Audio'):
     count += 1
-    (new_audio_state, audio_volume) = devices.audio.getstate()
+    (new_audio_state, audio_volume) = audio.getstate()
     if new_audio_state != audio_state or new_ingame != ingame:
-      if "audio" in overlay_processes:
-        overlay_processes["audio"].kill()
-        del overlay_processes["audio"]
+      kill_overlay_process("audio")
       overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_audio_state], alpha))
       audio_state = new_audio_state
     log = log + str(", Audio: %s %i%%" % (audio_state, audio_volume))
