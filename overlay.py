@@ -19,6 +19,7 @@ from collections import deque
 
 import devices.wifi
 import devices.bluetooth
+import devices.audio
 
 # Load Configuration
 config = configparser.ConfigParser()
@@ -59,13 +60,10 @@ icons = {
   "freq-capped": iconpath + "thermometer_" + config['Icons']['Size'] + ".png",
   "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
   "battery_critical_shutdown": iconpath + "battery-alert_120.png",
-  "volume_0": iconpath + "ic_volume_mute_black_" + config['Icons']['Size'] + "dp.png",
-  "volume_1": iconpath + "ic_volume_down_black_" + config['Icons']['Size'] + "dp.png",
-  "volume_2": iconpath + "ic_volume_up_black_" + config['Icons']['Size'] + "dp.png",
-  "volume_mute": iconpath + "ic_volume_off_black_"  + config['Icons']['Size'] + "dp.png"
 }
 devices.wifi.icons(icons, iconpath, config['Icons']['Size'])
 devices.bluetooth.icons(icons, iconpath, config['Icons']['Size'])
+devices.audio.icons(icons, iconpath, config['Icons']['Size'])
 
 env_cmd="vcgencmd get_throttled"
 
@@ -104,36 +102,6 @@ def translate_bat(voltage):
 
   # Convert the 0-1 range into a value in the right range.
   return bat_icons[state][int(round(valueScaled * rightSpan))]
-
-def audio(new_ingame):
-  global audio_state, ingame, overlay_processes, count, audio_volume
-
-  count += 1
-  new_audio_state = "volume_mute"
-  try:
-    cmd = subprocess.Popen('amixer', stdout=subprocess.PIPE)
-    for line in cmd.stdout:
-      if b'[' in line:
-        if line.split(b"[")[3].split(b"]")[0] == b"on":
-          audio_volume = int(line.split(b"[")[1].split(b"%")[0])
-          if audio_volume == 0:
-            new_audio_state = "volume_0"
-          elif audio_volume < 50:
-            new_audio_state = "volume_1"
-          else:
-            new_audio_state = "volume_2"
-        break
-
-  except IOError:
-    pass
-
-  if new_audio_state != audio_state or new_ingame != ingame:
-    if "audio" in overlay_processes:
-      overlay_processes["audio"].kill()
-      del overlay_processes["audio"]
-    overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_audio_state], alpha))
-  
-  return new_audio_state
 
 def environment():
   global overlay_processes, count
@@ -306,7 +274,14 @@ while True:
   
   # Audio Icon
   if config.getboolean('Detection', 'Audio'):
-    audio_state = audio(new_ingame)
+    count += 1
+    (new_audio_state, audio_volume) = devices.audio.getstate()
+    if new_audio_state != audio_state or new_ingame != ingame:
+      if "audio" in overlay_processes:
+        overlay_processes["audio"].kill()
+        del overlay_processes["audio"]
+      overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_audio_state], alpha))
+      audio_state = new_audio_state
     log = log + str(", Audio: %s %i%%" % (audio_state, audio_volume))
 
   env = environment()
