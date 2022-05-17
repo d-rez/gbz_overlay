@@ -17,6 +17,8 @@ from datetime import datetime
 from statistics import median
 from collections import deque
 
+import devices.wifi
+
 # Load Configuration
 config = configparser.ConfigParser()
 config.read(os.path.dirname(os.path.realpath(__file__)) + '/config.ini')
@@ -56,12 +58,6 @@ icons = {
   "freq-capped": iconpath + "thermometer_" + config['Icons']['Size'] + ".png",
   "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
   "battery_critical_shutdown": iconpath + "battery-alert_120.png",
-  "wifi_4": iconpath + "ic_signal_wifi_4_bar_black_" + config['Icons']['Size'] + "dp.png",
-  "wifi_3": iconpath + "ic_signal_wifi_3_bar_black_" + config['Icons']['Size'] + "dp.png",
-  "wifi_2": iconpath + "ic_signal_wifi_2_bar_black_" + config['Icons']['Size'] + "dp.png",
-  "wifi_1": iconpath + "ic_signal_wifi_1_bar_black_" + config['Icons']['Size'] + "dp.png",
-  "wifi_0": iconpath + "ic_signal_wifi_0_bar_black_" + config['Icons']['Size'] + "dp.png",
-  "wifi_off": iconpath + "ic_signal_wifi_off_black_" + config['Icons']['Size'] + "dp.png",
   "bt_enabled": iconpath + "ic_bluetooth_black_" + config['Icons']['Size'] + "dp.png",
   "bt_connected": iconpath + "ic_bluetooth_connected_black_" + config['Icons']['Size'] + "dp.png",
   "bt_disabled": iconpath + "ic_bluetooth_disabled_black_" + config['Icons']['Size'] + "dp.png",
@@ -70,9 +66,8 @@ icons = {
   "volume_2": iconpath + "ic_volume_up_black_" + config['Icons']['Size'] + "dp.png",
   "volume_mute": iconpath + "ic_volume_off_black_"  + config['Icons']['Size'] + "dp.png"
 }
+devices.wifi.icons(icons, iconpath, config['Icons']['Size'])
 
-wifi_carrier = "/sys/class/net/wlan0/carrier" # 1 when wifi connected, 0 when disconnected and/or ifdown
-wifi_linkmode = "/sys/class/net/wlan0/link_mode" # 1 when ifup, 0 when ifdown
 bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
 
@@ -111,54 +106,6 @@ def translate_bat(voltage):
 
   # Convert the 0-1 range into a value in the right range.
   return bat_icons[state][int(round(valueScaled * rightSpan))]
-
-def wifi(new_ingame):
-  global wifi_state, ingame, overlay_processes, count, wifi_quality
-
-  count += 1
-  new_wifi_state = "wifi_off"
-  wifi_quality = 0
-  try:
-    f = open(wifi_carrier, "r")
-    carrier_state = int(f.read().rstrip())
-    f.close()
-    if carrier_state == 1:
-      # ifup and connected to AP
-      new_wifi_state = "wifi_4"
-      # get wifi quality
-      cmd = subprocess.Popen(["iwconfig", "wlan0"], stdout=subprocess.PIPE)
-      for line in cmd.stdout:
-        if b'Link Quality' in line:
-          x = line.split()[1].split(b"=")[1].split(b"/")
-          wifi_quality = int(100*int(x[0])/int(x[1]))
-          if wifi_quality < 20:
-            new_wifi_state = "wifi_0"
-          elif wifi_quality < 40:
-            new_wifi_state = "wifi_1"
-          elif wifi_quality < 60:
-            new_wifi_state = "wifi_2"
-          elif wifi_quality < 80:
-            new_wifi_state = "wifi_3"
-          else:
-            new_wifi_state = "wifi_4"
-    elif carrier_state == 0:
-      f = open(wifi_linkmode, "r")
-      linkmode_state = int(f.read().rstrip())
-      f.close()
-      if linkmode_state == 1:
-        # ifup but not connected to any network
-        new_wifi_state = "wifi_0"
-        # else - must be ifdown
-      
-  except IOError:
-    pass
-
-  if new_wifi_state != wifi_state or new_ingame != ingame:  
-    if "wifi" in overlay_processes:
-      overlay_processes["wifi"].kill()
-      del overlay_processes["wifi"]
-    overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_wifi_state], alpha))
-  return new_wifi_state
 
 def audio(new_ingame):
   global audio_state, ingame, overlay_processes, count, audio_volume
@@ -337,6 +284,7 @@ battery_history = deque(maxlen=5)
 audio_volume = 0
 shutdown_pending = False
 
+# Main Loop
 while True:
   count = 0
   
@@ -349,6 +297,8 @@ while True:
     alpha = "255";
 
   log = str("%s" % (datetime.now()))
+  
+  # Battery Icon
   if config.getboolean('Detection','BatteryADC'):
     (battery_level, value_v) = battery(new_ingame)
     log = log + str(", median: %.2f, %s,icon: %s" % (
@@ -356,18 +306,32 @@ while True:
       list(battery_history),
       battery_level
     ))
+  
+  # Wifi Icon
   if config.getboolean('Detection','Wifi'):
-    wifi_state = wifi(new_ingame)
+    count += 1
+    (new_wifi_state, wifi_quality) = devices.wifi.get_state()
+    if new_wifi_state != wifi_state or new_ingame != ingame:  
+      if "wifi" in overlay_processes:
+        overlay_processes["wifi"].kill()
+        del overlay_processes["wifi"]
+      overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_wifi_state], alpha))
+      wifi_state = new_wifi_state
     log = log + str(", wifi: %s %i%%" % (
       wifi_state,
       wifi_quality
     ))
+    
+  # Bluetooth Icon
   if config.getboolean('Detection','Bluetooth'):
     bt_state = bluetooth(new_ingame)
     log = log + str(", bt: %s" % (bt_state))
+  
+  # Audio Icon
   if config.getboolean('Detection', 'Audio'):
     audio_state = audio(new_ingame)
     log = log + str(", Audio: %s %i%%" % (audio_state, audio_volume))
+
   env = environment()
   my_logger.info(log + str(", throttle: %#0x" % (env)))
   
