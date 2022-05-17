@@ -18,6 +18,7 @@ from statistics import median
 from collections import deque
 
 import devices.wifi
+import devices.bluetooth
 
 # Load Configuration
 config = configparser.ConfigParser()
@@ -58,17 +59,14 @@ icons = {
   "freq-capped": iconpath + "thermometer_" + config['Icons']['Size'] + ".png",
   "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
   "battery_critical_shutdown": iconpath + "battery-alert_120.png",
-  "bt_enabled": iconpath + "ic_bluetooth_black_" + config['Icons']['Size'] + "dp.png",
-  "bt_connected": iconpath + "ic_bluetooth_connected_black_" + config['Icons']['Size'] + "dp.png",
-  "bt_disabled": iconpath + "ic_bluetooth_disabled_black_" + config['Icons']['Size'] + "dp.png",
   "volume_0": iconpath + "ic_volume_mute_black_" + config['Icons']['Size'] + "dp.png",
   "volume_1": iconpath + "ic_volume_down_black_" + config['Icons']['Size'] + "dp.png",
   "volume_2": iconpath + "ic_volume_up_black_" + config['Icons']['Size'] + "dp.png",
   "volume_mute": iconpath + "ic_volume_off_black_"  + config['Icons']['Size'] + "dp.png"
 }
 devices.wifi.icons(icons, iconpath, config['Icons']['Size'])
+devices.bluetooth.icons(icons, iconpath, config['Icons']['Size'])
 
-bt_devices_dir="/sys/class/bluetooth"
 env_cmd="vcgencmd get_throttled"
 
 
@@ -136,34 +134,6 @@ def audio(new_ingame):
     overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_audio_state], alpha))
   
   return new_audio_state
-
-def bluetooth(new_ingame):
-  global bt_state, overlay_processes, count
-
-  count += 1
-  new_bt_state = "bt_disabled"
-  try:
-    p1 = subprocess.Popen('hciconfig', stdout = subprocess.PIPE)
-    p2 = subprocess.Popen(['awk', 'FNR == 3 {print tolower($1)}'], stdin = p1.stdout, stdout=subprocess.PIPE)
-    state=p2.communicate()[0].decode().rstrip()
-    if state == "up":
-      new_bt_state = "bt_enabled"
-  except IOError:
-    pass
-
-  try:
-    devices=os.listdir(bt_devices_dir)
-    if len(devices) > 1:
-      new_bt_state = "bt_connected"
-  except OSError:
-    pass
-
-  if new_bt_state != bt_state or new_ingame != ingame:
-    if "bt" in overlay_processes:
-      overlay_processes["bt"].kill()
-      del overlay_processes["bt"]
-    overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_bt_state], alpha))
-  return new_bt_state
 
 def environment():
   global overlay_processes, count
@@ -324,7 +294,14 @@ while True:
     
   # Bluetooth Icon
   if config.getboolean('Detection','Bluetooth'):
-    bt_state = bluetooth(new_ingame)
+    count += 1
+    new_bt_state = devices.bluetooth.getstate()
+    if new_bt_state != bt_state or new_ingame != ingame:
+      if "bt" in overlay_processes:
+        overlay_processes["bt"].kill()
+        del overlay_processes["bt"]
+      overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_bt_state], alpha))
+      bt_state = new_bt_state
     log = log + str(", bt: %s" % (bt_state))
   
   # Audio Icon
