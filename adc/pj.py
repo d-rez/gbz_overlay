@@ -16,5 +16,5 @@ pijuice = PiJuice(1, 0x14) # Instantiate PiJuice interface object
 
 # ADC read function, return voltage
 def read(channel):
-  voltage = pijuice.status.GetBatteryVoltage()
-  return voltage['data'] / 1000
+    voltage = pijuice.status.GetBatteryVoltage()
+    return voltage['data'] / 1000

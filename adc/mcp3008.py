@@ -11,15 +11,16 @@
 import Adafruit_MCP3008
 
 # Setup ADC
-adc_vref = 3.3
-spi_clk = 11
-spi_cs = 8
-spi_miso = 9
-spi_mosi = 10
+ADC_VREF = 3.3
+SPI_CLK = 11
+SPI_CS = 8
+SPI_MISO = 9
+SPI_MOSI = 10
 
-adc = Adafruit_MCP3008.MCP3008(clk=spi_clk, cs=spi_cs, miso=spi_miso, mosi=spi_mosi)
+adc = Adafruit_MCP3008.MCP3008(clk=SPI_CLK, cs=SPI_CS, miso=SPI_MISO, mosi=SPI_MOSI)
 
 #ADC read function, return voltage
 def read(channel):
-  value = adc.read_adc(channel)
-  value_v = adc_vref * value / 1024
+    value = adc.read_adc(channel)
+    value_v = ADC_VREF * value / 1024
+    return value_v

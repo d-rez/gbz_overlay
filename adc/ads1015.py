@@ -19,6 +19,6 @@ adc = Adafruit_ADS1x15.ADS1015()
 
 # ADC read function, return voltage
 def read(channel):
-  value = adc.read_adc(channel, gain=2/3) # Channel 0, 2/3 gain
-  value_v = value * 0.003 #1 bit = 3mV
-  return value_v
+    value = adc.read_adc(channel, gain=2/3) # Channel 0, 2/3 gain
+    value_v = value * 0.003 #1 bit = 3mV
+    return value_v
