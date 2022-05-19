@@ -3,4 +3,4 @@
 #
 # Author: bverc
 
-__all__ = ["wifi", "bluetooth", "audio"]
+__all__ = ["wifi", "bluetooth", "audio", "battery"]

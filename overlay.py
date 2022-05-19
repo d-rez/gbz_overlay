@@ -14,8 +14,6 @@ import psutil
 import configparser
 from RPi import GPIO
 from datetime import datetime
-from statistics import median
-from collections import deque
 
 from devices import *
 
@@ -57,49 +55,19 @@ icons = {
   "under-voltage": iconpath + "flash_" + config['Icons']['Size'] + ".png",
   "freq-capped": iconpath + "thermometer_" + config['Icons']['Size'] + ".png",
   "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
-  "battery_critical_shutdown": iconpath + "battery-alert_120.png",
 }
 wifi.icons(icons, iconpath, config['Icons']['Size'])
 bluetooth.icons(icons, iconpath, config['Icons']['Size'])
 audio.icons(icons, iconpath, config['Icons']['Size'])
+battery.icons(icons, iconpath, config['Icons']['Size'])
 
 env_cmd="vcgencmd get_throttled"
-
-
-if config.getboolean('Detection','BatteryADC'):
-  import importlib
-  adc = importlib.import_module('adc.' + config.get('Detection','ADCType').lower())
-  
-  vmax = {"discharging": config.getfloat("Detection", "VMaxDischarging"),
-          "charging"   : config.getfloat("Detection", "VMaxCharging") }
-  vmin = {"discharging": config.getfloat("Detection", "VMinDischarging"),
-          "charging"   : config.getfloat("Detection", "VMinCharging") }
-
-  bat_icons = { "discharging": [ "alert_red", "alert", "20", "30", "30", "50", "60",
-                             "60", "80", "90", "full", "full" ],
-            "charging"   : [ "charging_20", "charging_20", "charging_20",
-                             "charging_30", "charging_30", "charging_50",
-                             "charging_60", "charging_60", "charging_80",
-                             "charging_90", "charging_full", "charging_full" ]}
   
 def x_position(count):
   if config['Icons']['Horizontal'] == "right":
     return int(resolution[0]) - (int(config['Icons']['Size']) + int(config['Icons']['Padding'])) * count
   else:
     return int(config['Icons']['Padding']) + (int(config['Icons']['Size']) + int(config['Icons']['Padding'])) * (count - 1)
-
-def translate_bat(voltage):
-  # Figure out how 'wide' each range is
-  state = voltage <= vmax["discharging"] and "discharging" or "charging"
-
-  leftSpan = vmax[state] - vmin[state]
-  rightSpan = len(bat_icons[state]) - 1
-
-  # Convert the left range into a 0-1 range (float)
-  valueScaled = float(voltage - vmin[state]) / float(leftSpan)
-
-  # Convert the 0-1 range into a value in the right range.
-  return bat_icons[state][int(round(valueScaled * rightSpan))]
 
 def environment():
   global overlay_processes, count
@@ -120,38 +88,6 @@ def environment():
         kill_overlay_process(k)
 
   return val
-
-def battery(new_ingame):
-  global battery_level, overlay_processes, battery_history, shutdown_pending, count
-  
-  value_v = adc.read(config.getint("Detection", "ADCChannel")) * config.getfloat("Detection", "ADCGain")
-
-  count+=1
-
-  my_logger.info("Battery Voltage " + str(value_v))
-
-  battery_history.append(value_v)
-  try:
-    level_icon=translate_bat(median(battery_history))
-  except IndexError:
-    level_icon="alert_red"
-
-  if config.getboolean('Detection','ADCShutdown'):
-    if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
-      shutdown(False)
-      shutdown_pending = False
-    elif value_v < config.getfloat("Detection", "VMinDischarging"):
-      shutdown(True)
-      shutdown_pending = True
-
-  if level_icon != battery_level or new_ingame != ingame:
-    kill_overlay_process("bat")
-    
-    bat_iconpath = iconpath + "ic_battery_" + level_icon + "_black_" + config['Icons']['Size'] + "dp.png"
-    if (level_icon == "alert_red"):
-      bat_iconpath = iconpath + "battery-alert_" + config['Icons']['Size'] + ".png"
-    overlay_processes["bat"] = subprocess.Popen(pngview_call(x_position(count), y_position, bat_iconpath, alpha))
-  return (level_icon, value_v)
 
 def check_process(process):
   #Iterate over the all the running process
@@ -209,13 +145,15 @@ overlay_processes = {}
 wifi_state = None
 bt_state = None
 audio_state = None
-battery_level = None
+battery_state = None
 env = None
 ingame = None
 value_v = None
-battery_history = deque(maxlen=5)
 audio_volume = 0
 shutdown_pending = False
+
+if config.getboolean('Detection','BatteryADC'):
+  bat = battery.Battery(config)
 
 # Main Loop
 while True:
@@ -233,11 +171,30 @@ while True:
   
   # Battery Icon
   if config.getboolean('Detection','BatteryADC'):
-    (battery_level, value_v) = battery(new_ingame)
-    log = log + str(", median: %.2f, %s,icon: %s" % (
+    count += 1
+    (new_battery_state, value_v) = bat.getstate()
+
+    if new_battery_state != battery_state or new_ingame != ingame:
+      kill_overlay_process("bat")
+      
+      bat_iconpath = iconpath + "ic_battery_" + new_battery_state + "_black_" + config['Icons']['Size'] + "dp.png"
+      if (new_battery_state == "alert_red"):
+        bat_iconpath = iconpath + "battery-alert_" + config['Icons']['Size'] + ".png"
+      overlay_processes["bat"] = subprocess.Popen(pngview_call(x_position(count), y_position, bat_iconpath, alpha))
+      
+      battery_state = new_battery_state
+      
+      if config.getboolean('Detection','ADCShutdown'):
+        if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
+          shutdown(False)
+          shutdown_pending = False
+        elif value_v < config.getfloat("Detection", "VMinDischarging"):
+          shutdown(True)
+          shutdown_pending = True
+    
+    log = log + str(", battery: %.2fV %s%%" % (
       value_v,
-      list(battery_history),
-      battery_level
+      battery_state
     ))
   
   # Wifi Icon
