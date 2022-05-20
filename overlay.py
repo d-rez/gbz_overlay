@@ -10,12 +10,13 @@ import os
 import re
 import logging
 import logging.handlers
-import psutil
 import configparser
-from RPi import GPIO
 from datetime import datetime
 
-from devices import *
+import psutil
+from RPi import GPIO
+
+from devices import wifi, audio, bluetooth, battery
 
 # Load Configuration
 config = configparser.ConfigParser()
@@ -31,20 +32,24 @@ console = logging.StreamHandler()
 my_logger.addHandler(console)
 
 # Get Framebuffer resolution
-fbfile = "tvservice -s"
-resolution = re.search("(\d{3,}x\d{3,})", subprocess.check_output(fbfile.split()).decode().rstrip()).group().split('x')
+FB_FILE = "tvservice -s"
+FB_OUTPUT = subprocess.check_output(FB_FILE.split()).decode().rstrip()
+resolution = re.search(r"(\d{3,}x\d{3,})", FB_OUTPUT).group().split('x')
 my_logger.info(resolution)
 
 # Setup icons
-iconpath = os.path.dirname(os.path.realpath(__file__)) + "/colored_icons/"
+ICON_PATH = os.path.dirname(os.path.realpath(__file__)) + "/colored_icons/"
+ICON_SIZE = config['Icons']['Size']
+ICON_PADDING = config['Icons']['Padding']
 
-pngview_path = "/usr/local/bin/pngview"
-y_position = config['Icons']['Padding']
+PNGVIEW_PATH = "/usr/local/bin/pngview"
+Y_POS = ICON_PADDING
 if config['Icons']['Vertical'] == "bottom":
-    y_position = str(int(resolution[1]) - int(config['Icons']['Size']) - int(config['Icons']['Padding']))
+    Y_POS = str(int(resolution[1]) - int(ICON_SIZE) - int(ICON_PADDING))
 
 def pngview_call(x, y, icon, alpha=255):
-    pngview_call = [pngview_path, "-d", "0", "-b", "0x0000", "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
+    pngview_call = [PNGVIEW_PATH, "-d", "0", "-b", "0x0000",
+                    "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
     if int(alpha) < 255:
         pngview_call += ["-a", str(alpha)]
     pngview_call += [icon]
@@ -52,40 +57,41 @@ def pngview_call(x, y, icon, alpha=255):
     return pngview_call
 
 icons = {
-    "under-voltage": iconpath + "flash_" + config['Icons']['Size'] + ".png",
-    "freq-capped": iconpath + "thermometer_" + config['Icons']['Size'] + ".png",
-    "throttled": iconpath + "thermometer-lines_" + config['Icons']['Size'] + ".png",
+    "under-voltage": ICON_PATH + "flash_" + ICON_SIZE + ".png",
+    "freq-capped": ICON_PATH + "thermometer_" + ICON_SIZE + ".png",
+    "throttled": ICON_PATH + "thermometer-lines_" + ICON_SIZE + ".png",
 }
-wifi.icons(icons, iconpath, config['Icons']['Size'])
-bluetooth.icons(icons, iconpath, config['Icons']['Size'])
-audio.icons(icons, iconpath, config['Icons']['Size'])
-battery.icons(icons, iconpath, config['Icons']['Size'])
+wifi.add_icons(icons, ICON_PATH, ICON_SIZE)
+bluetooth.add_icons(icons, ICON_PATH, ICON_SIZE)
+audio.add_icons(icons, ICON_PATH, ICON_SIZE)
+battery.add_icons(icons, ICON_PATH)
 
 env_cmd = "vcgencmd get_throttled"
 
-def x_position(count):
+def x_pos(count):
     if config['Icons']['Horizontal'] == "right":
-        return int(resolution[0]) - (int(config['Icons']['Size']) + int(config['Icons']['Padding'])) * count
-    else:
-        return int(config['Icons']['Padding']) + (int(config['Icons']['Size']) + int(config['Icons']['Padding'])) * (count - 1)
+        return int(resolution[0]) - (int(ICON_SIZE) + int(ICON_PADDING)) * count
+    return int(ICON_PADDING) + (int(ICON_SIZE) + int(ICON_PADDING)) * (count - 1)
 
 def environment():
     global overlay_processes, count
 
-    val = int(re.search("throttled=(0x\d+)", subprocess.check_output(env_cmd.split()).decode().rstrip()).groups()[0], 16)
+    env_output = subprocess.check_output(env_cmd.split()).decode().rstrip()
+    val = int(re.search(r"throttled=(0x\d+)", env_output).groups()[0], 16)
     env = {
         "under-voltage": bool(val & 0x01),
         "freq-capped": bool(val & 0x02),
         "throttled": bool(val & 0x04)
     }
 
-    if config.get('Detection', 'HideEnvWarnings') == False:
-        for k, v in env.items():
-            if v and not k in overlay_processes:
+    if not config.get('Detection', 'HideEnvWarnings'):
+        for key, value in env.items():
+            if value and not key in overlay_processes:
                 count += 1
-                overlay_processes[k] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[k]), alpha)
-            elif not v:
-                kill_overlay_process(k)
+                cmd = pngview_call(x_pos(count), Y_POS, icons[key], alpha)
+                overlay_processes[key] = subprocess.Popen(cmd)
+            elif not value:
+                kill_overlay_process(key)
 
     return val
 
@@ -124,7 +130,10 @@ def shutdown(low_voltage):
     kill_overlay_process("caution")
     if low_voltage:
         my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
-        overlay_processes["caution"] = subprocess.Popen(pngview_call(int(resolution[0]) / 2 - 60, int(resolution[1]) / 2 - 60, icons["battery_critical_shutdown"]))
+        x = int(resolution[0]) / 2 - 60
+        y = int(resolution[1]) / 2 - 60
+        cmd = pngview_call(x, y, icons["battery_critical_shutdown"])
+        overlay_processes["caution"] = subprocess.Popen(cmd)
         os.system("sudo shutdown -P +1")
     else:
         os.system("sudo shutdown -c")
@@ -132,14 +141,16 @@ def shutdown(low_voltage):
 
 GPIO.setmode(GPIO.BCM)
 if config.getboolean('Detection', 'BatteryLDO'):
-    my_logger.info("LDO Active on GPIO %s", config['BatteryLDO']['GPIO'])
-    GPIO.setup(int(config['BatteryLDO']['GPIO']), GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(int(config['BatteryLDO']['GPIO']), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=500)
+    LDO_GPIO = config['BatteryLDO']['GPIO']
+    my_logger.info("LDO Active on GPIO %s", LDO_GPIO)
+    GPIO.setup(int(LDO_GPIO), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(int(LDO_GPIO), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=500)
 
 if config.getboolean('Detection', 'ShutdownGPIO'):
-    my_logger.info("Shutdown button on GPIO %s", config['ShutdownGPIO']['GPIO'])
-    GPIO.setup(int(config['ShutdownGPIO']['GPIO']), GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(int(config['ShutdownGPIO']['GPIO']), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=200)
+    SD_GPIO = config['ShutdownGPIO']['GPIO']
+    my_logger.info("Shutdown button on GPIO %s", SD_GPIO)
+    GPIO.setup(int(SD_GPIO), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+    GPIO.add_event_detect(int(SD_GPIO), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=200)
 
 overlay_processes = {}
 wifi_state = None
@@ -167,20 +178,22 @@ while True:
     else:
         alpha = "255"
 
-    log = str("%s" % (datetime.now()))
+    log = str(datetime.now())
 
     # Battery Icon
     if config.getboolean('Detection', 'BatteryADC'):
         count += 1
-        (new_battery_state, value_v) = bat.getstate()
+        (new_battery_state, value_v) = bat.get_state()
 
         if new_battery_state != battery_state or new_ingame != ingame:
             kill_overlay_process("bat")
 
-            bat_iconpath = iconpath + "ic_battery_" + new_battery_state + "_black_" + config['Icons']['Size'] + "dp.png"
+            bat_icon_path = (ICON_PATH + "ic_battery_" + new_battery_state +
+                            "_black_" + ICON_SIZE + "dp.png")
             if new_battery_state == "alert_red":
-                bat_iconpath = iconpath + "battery-alert_" + config['Icons']['Size'] + ".png"
-            overlay_processes["bat"] = subprocess.Popen(pngview_call(x_position(count), y_position, bat_iconpath, alpha))
+                bat_icon_path = ICON_PATH + "battery-alert_" + ICON_SIZE + ".png"
+            cmd = pngview_call(x_pos(count), Y_POS, bat_icon_path, alpha)
+            overlay_processes["bat"] = subprocess.Popen(cmd)
 
             battery_state = new_battery_state
 
@@ -192,10 +205,7 @@ while True:
                     shutdown(True)
                     shutdown_pending = True
 
-        log = log + str(", battery: %.2fV %s%%" % (
-            value_v,
-            battery_state
-        ))
+        log = log + f', battery: {value_v:.2f} {battery_state}%'
 
     # Wifi Icon
     if config.getboolean('Detection', 'Wifi'):
@@ -203,35 +213,35 @@ while True:
         (new_wifi_state, wifi_quality) = wifi.get_state()
         if new_wifi_state != wifi_state or new_ingame != ingame:
             kill_overlay_process("wifi")
-            overlay_processes["wifi"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_wifi_state], alpha))
+            cmd = pngview_call(x_pos(count), Y_POS, icons[new_wifi_state], alpha)
+            overlay_processes["wifi"] = subprocess.Popen(cmd)
             wifi_state = new_wifi_state
-        log = log + str(", wifi: %s %i%%" % (
-            wifi_state,
-            wifi_quality
-        ))
+        log = log + f', wifi: {wifi_state} {wifi_quality}%'
 
     # Bluetooth Icon
     if config.getboolean('Detection', 'Bluetooth'):
         count += 1
-        new_bt_state = bluetooth.getstate()
+        new_bt_state = bluetooth.get_state()
         if new_bt_state != bt_state or new_ingame != ingame:
             kill_overlay_process("bt")
-            overlay_processes["bt"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_bt_state], alpha))
+            cmd = pngview_call(x_pos(count), Y_POS, icons[new_bt_state], alpha)
+            overlay_processes["bt"] = subprocess.Popen(cmd)
             bt_state = new_bt_state
-        log = log + str(", bt: %s" % (bt_state))
+        log = log + f', bt: {bt_state}'
 
     # Audio Icon
     if config.getboolean('Detection', 'Audio'):
         count += 1
-        (new_audio_state, audio_volume) = audio.getstate()
+        (new_audio_state, audio_volume) = audio.get_state()
         if new_audio_state != audio_state or new_ingame != ingame:
             kill_overlay_process("audio")
-            overlay_processes["audio"] = subprocess.Popen(pngview_call(x_position(count), y_position, icons[new_audio_state], alpha))
+            cmd = pngview_call(x_pos(count), Y_POS, icons[new_audio_state], alpha)
+            overlay_processes["audio"] = subprocess.Popen(cmd)
             audio_state = new_audio_state
-        log = log + str(", Audio: %s %i%%" % (audio_state, audio_volume))
+        log = log + f', Audio: {audio_state} {audio_volume}%'
 
     env = environment()
-    my_logger.info(log + str(", throttle: %#0x" % (env)))
+    my_logger.info(log + f', throttle: 0x{env}')
 
     ingame = new_ingame
     time.sleep(5)

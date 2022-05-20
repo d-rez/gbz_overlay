@@ -3,7 +3,6 @@
 #
 # Authors: bverc, d-rez
 
-import configparser
 import importlib
 from statistics import median
 from collections import deque
@@ -15,23 +14,22 @@ bat_icons = {"discharging": ["alert_red", "alert", "20", "30", "30", "50", "60",
                              "charging_60", "charging_60", "charging_80",
                              "charging_90", "charging_full", "charging_full"]}
 
-def icons(icons, iconpath, size):
+def add_icons(icons, iconpath):
     icons['battery_critical_shutdown'] = iconpath + "battery-alert_120.png"
 
 def translate_bat(voltage, vmax, vmin):
+    # determine if charging or discharging
+    state = 'discharging' if voltage <= vmax['discharging'] else 'charging'
+
     # Figure out how 'wide' each range is
-    state = voltage <= vmax["discharging"] and "discharging" or "charging"
+    voltage_span = vmax[state] - vmin[state]
+    state_span = len(bat_icons[state]) - 1
 
-    leftSpan = vmax[state] - vmin[state]
-    rightSpan = len(bat_icons[state]) - 1
+    # Convert the voltage into a 0-1 range (float)
+    value_scaled = max(float(voltage - vmin[state]) / float(voltage_span), 0)
 
-    # Convert the left range into a 0-1 range (float)
-    valueScaled = float(voltage - vmin[state]) / float(leftSpan)
-    if valueScaled < 0:
-        valueScaled = 0
-
-    # Convert the 0-1 range into a value in the right range.
-    return bat_icons[state][int(round(valueScaled * rightSpan))]
+    # Convert the scaled value into the correct state
+    return bat_icons[state][int(round(value_scaled * state_span))]
 
 class Battery:
     def __init__(self, config):
@@ -46,7 +44,7 @@ class Battery:
         self.adc_channel = config.getint("Detection", "ADCChannel")
         self.adc_gain = config.getfloat("Detection", "ADCGain")
 
-    def getstate(self):
+    def get_state(self):
         value_v = self.adc.read(self.adc_channel) * self.adc_gain
 
         self.battery_history.append(value_v)
