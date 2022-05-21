@@ -72,7 +72,7 @@ bluetooth.add_icons(icons, ICON_PATH, ICON_SIZE)
 audio.add_icons(icons, ICON_PATH, ICON_SIZE)
 battery.add_icons(icons, ICON_PATH)
 
-env_cmd = "vcgencmd get_throttled"
+ENV_CMD = "vcgencmd get_throttled"
 
 def x_pos(count):
     """Return x position for next icon based on number or icons already displayed."""
@@ -82,26 +82,14 @@ def x_pos(count):
 
 def environment():
     """Return state of environment, such as unndervoltage or throttled."""
-    global overlay_processes, count
-
-    env_output = subprocess.check_output(env_cmd.split()).decode().rstrip()
+    env_output = subprocess.check_output(ENV_CMD.split()).decode().rstrip()
     val = int(re.search(r"throttled=(0x\d+)", env_output).groups()[0], 16)
     env = {
         "under-voltage": bool(val & 0x01),
         "freq-capped": bool(val & 0x02),
         "throttled": bool(val & 0x04)
     }
-
-    if not config.get('Detection', 'HideEnvWarnings'):
-        for key, value in env.items():
-            if value and not key in overlay_processes:
-                count += 1
-                cmd = pngview_call(x_pos(count), Y_POS, icons[key], alpha)
-                overlay_processes[key] = subprocess.Popen(cmd)
-            elif not value:
-                kill_overlay_process(key)
-
-    return val
+    return env
 
 def check_process(process):
     """Check to see if process is already running."""
@@ -252,8 +240,21 @@ while True:
             audio_state = new_audio_state
         log = log + f', Audio: {audio_state} {audio_volume}%'
 
-    env = environment()
-    my_logger.info(log + f', throttle: 0x{env}')
+    # Enviroment Icons
+    if not config.getboolean('Detection', 'HideEnvWarnings'):
+        env = environment()
+        env_text = 'normal'
+        for key, value in env.items():
+            if value:
+                env_text = key
+                if not key in overlay_processes:
+                    count += 1
+                    cmd = pngview_call(x_pos(count), Y_POS, icons[key], alpha)
+                    overlay_processes[key] = subprocess.Popen(cmd)
+            elif not value:
+                kill_overlay_process(key)
+        log = log + f', environment: {env_text}'
 
+    my_logger.info(log)
     ingame = new_ingame
     time.sleep(5)
