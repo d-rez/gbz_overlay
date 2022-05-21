@@ -1,7 +1,8 @@
-# Wifi device for retropie-status-overlay
-# github.com/bverc/retropie-status-overlay
-#
-# Authors: bverc, d-rez
+"""Wifi device for retropie-status-overlay
+github.com/bverc/retropie-status-overlay
+
+Authors: bverc, d-rez
+"""
 
 import subprocess
 
@@ -13,6 +14,7 @@ WIFI_LINKMODE = "/sys/class/net/wlan0/link_mode"
 
 
 def add_icons(icons, iconpath, size):
+    """Add WIFI specific icons."""
     icons['wifi_4'] = iconpath + "ic_signal_wifi_4_bar_black_" + size + "dp.png"
     icons['wifi_3'] = iconpath + "ic_signal_wifi_3_bar_black_" + size + "dp.png"
     icons['wifi_2'] = iconpath + "ic_signal_wifi_2_bar_black_" + size + "dp.png"
@@ -21,6 +23,7 @@ def add_icons(icons, iconpath, size):
     icons['wifi_off'] = iconpath + "ic_signal_wifi_off_black_" + size + "dp.png"
 
 def get_state():
+    """Get state of WIFI device."""
     wifi_state = "wifi_off"
     wifi_quality = 0
     try:

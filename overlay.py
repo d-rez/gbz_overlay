@@ -1,8 +1,13 @@
 #!/usr/bin/env python3
-# Authors: d-rez, bverc, louisvarley
-# Requires:
-# - pngview by AndrewFromMelbourne
-# - an entry in crontab
+""" Python script to display status icons on top of your RetroPie games and emulationstation menus
+github.com/bverc/retropie-status-overlay
+
+Authors: d-rez, bverc, louisvarley
+
+Requires:
+- pngview by AndrewFromMelbourne
+- an entry in crontab
+"""
 
 import time
 import subprocess
@@ -48,6 +53,7 @@ if config['Icons']['Vertical'] == "bottom":
     Y_POS = str(int(resolution[1]) - int(ICON_SIZE) - int(ICON_PADDING))
 
 def pngview_call(x, y, icon, alpha=255):
+    """Return an array used to call pngview from binary location."""
     pngview_call = [PNGVIEW_PATH, "-d", "0", "-b", "0x0000",
                     "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
     if int(alpha) < 255:
@@ -69,11 +75,13 @@ battery.add_icons(icons, ICON_PATH)
 env_cmd = "vcgencmd get_throttled"
 
 def x_pos(count):
+    """Return x position for next icon based on number or icons already displayed."""
     if config['Icons']['Horizontal'] == "right":
         return int(resolution[0]) - (int(ICON_SIZE) + int(ICON_PADDING)) * count
     return int(ICON_PADDING) + (int(ICON_SIZE) + int(ICON_PADDING)) * (count - 1)
 
 def environment():
+    """Return state of environment, such as unndervoltage or throttled."""
     global overlay_processes, count
 
     env_output = subprocess.check_output(env_cmd.split()).decode().rstrip()
@@ -96,6 +104,7 @@ def environment():
     return val
 
 def check_process(process):
+    """Check to see if process is already running."""
     #Iterate over the all the running process
     for proc in psutil.process_iter():
         try:
@@ -107,11 +116,13 @@ def check_process(process):
     return False
 
 def kill_overlay_process(device):
+    """Kill process for specific icon type."""
     if device in overlay_processes:
         overlay_processes[device].kill()
         del overlay_processes[device]
 
 def interrupt_shutdown(channel):
+    """Shutdown system if interrupt activated."""
     if channel == int(config['BatteryLDO']['GPIO']):
         if GPIO.input(channel) != config.getboolean('BatteryLDO', 'ActiveLow'):
             shutdown(True)
@@ -127,6 +138,7 @@ def interrupt_shutdown(channel):
                 my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
 
 def shutdown(low_voltage):
+    """Shutdown system if low voltage, otherwise abort shutdown."""
     kill_overlay_process("caution")
     if low_voltage:
         my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")

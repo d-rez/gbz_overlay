@@ -1,7 +1,8 @@
-# Bluetooth device for retropie-status-overlay
-# github.com/bverc/retropie-status-overlay
-#
-# Authors: bverc, d-rez
+"""Bluetooth device for retropie-status-overlay
+github.com/bverc/retropie-status-overlay
+
+Authors: bverc, d-rez
+"""
 
 import subprocess
 import os
@@ -9,11 +10,13 @@ import os
 BT_DEVICES_DIR = "/sys/class/bluetooth"
 
 def add_icons(icons, iconpath, size):
+    """Add Bluetooth specific icons."""
     icons['bt_enabled'] = iconpath + "ic_bluetooth_black_" + size + "dp.png"
     icons['bt_connected'] = iconpath + "ic_bluetooth_connected_black_" + size + "dp.png"
     icons['bt_disabled'] = iconpath + "ic_bluetooth_disabled_black_" + size + "dp.png"
 
 def get_state():
+    """Get state of Bluetooth device."""
     bt_state = "bt_disabled"
     try:
         p1 = subprocess.Popen('hciconfig', stdout=subprocess.PIPE)
