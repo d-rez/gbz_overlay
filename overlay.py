@@ -54,13 +54,13 @@ if config['Icons']['Vertical'] == "bottom":
 
 def pngview_call(x, y, icon, alpha=255):
     """Return an array used to call pngview from binary location."""
-    pngview_call = [PNGVIEW_PATH, "-d", "0", "-b", "0x0000",
-                    "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
+    call = [PNGVIEW_PATH, "-d", "0", "-b", "0x0000",
+            "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
     if int(alpha) < 255:
-        pngview_call += ["-a", str(alpha)]
-    pngview_call += [icon]
+        call += ["-a", str(alpha)]
+    call += [icon]
 
-    return pngview_call
+    return call
 
 icons = {
     "under-voltage": ICON_PATH + "flash_" + ICON_SIZE + ".png",

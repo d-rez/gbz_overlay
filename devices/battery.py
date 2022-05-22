@@ -61,4 +61,3 @@ class Battery:
             battery_state = "alert_red"
 
         return (battery_state, median_v)
-
