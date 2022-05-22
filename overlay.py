@@ -153,108 +153,111 @@ if config.getboolean('Detection', 'ShutdownGPIO'):
     GPIO.add_event_detect(int(SD_GPIO), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=200)
 
 overlay_processes = {}
-wifi_state = None
-bt_state = None
-audio_state = None
-battery_state = None
-env = None
-ingame = None
-value_v = None
-audio_volume = 0
-shutdown_pending = False
 
 if config.getboolean('Detection', 'BatteryADC'):
     bat = battery.Battery(config)
 
-# Main Loop
-while True:
-    count = 0
+def main():
+    """ Main Function."""
+    wifi_state = None
+    bt_state = None
+    audio_state = None
+    battery_state = None
+    ingame = None
+    shutdown_pending = False
 
-    # Check if retroarch is running
-    new_ingame = check_process('retroarch')
+    # Main Loop
+    while True:
+        count = 0
 
-    if new_ingame:
-        alpha = config['Detection']['InGameAlpha']
-    else:
-        alpha = "255"
+        # Check if retroarch is running
+        new_ingame = check_process('retroarch')
 
-    log = str(datetime.now())
+        if new_ingame:
+            alpha = config['Detection']['InGameAlpha']
+        else:
+            alpha = "255"
 
-    # Battery Icon
-    if config.getboolean('Detection', 'BatteryADC'):
-        count += 1
-        (new_battery_state, value_v) = bat.get_state()
+        log = str(datetime.now())
 
-        if new_battery_state != battery_state or new_ingame != ingame:
-            kill_overlay_process("bat")
+        # Battery Icon
+        if config.getboolean('Detection', 'BatteryADC'):
+            count += 1
+            (new_battery_state, value_v) = bat.get_state()
 
-            bat_icon_path = (ICON_PATH + "ic_battery_" + new_battery_state +
-                            "_black_" + ICON_SIZE + "dp.png")
-            if new_battery_state == "alert_red":
-                bat_icon_path = ICON_PATH + "battery-alert_" + ICON_SIZE + ".png"
-            cmd = pngview_call(x_pos(count), Y_POS, bat_icon_path, alpha)
-            overlay_processes["bat"] = subprocess.Popen(cmd)
+            if new_battery_state != battery_state or new_ingame != ingame:
+                kill_overlay_process("bat")
 
-            battery_state = new_battery_state
+                bat_icon_path = (ICON_PATH + "ic_battery_" + new_battery_state +
+                                "_black_" + ICON_SIZE + "dp.png")
+                if new_battery_state == "alert_red":
+                    bat_icon_path = ICON_PATH + "battery-alert_" + ICON_SIZE + ".png"
+                cmd = pngview_call(x_pos(count), Y_POS, bat_icon_path, alpha)
+                overlay_processes["bat"] = subprocess.Popen(cmd)
 
-            if config.getboolean('Detection', 'ADCShutdown'):
-                if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
-                    shutdown(False)
-                    shutdown_pending = False
-                elif value_v < config.getfloat("Detection", "VMinDischarging"):
-                    shutdown(True)
-                    shutdown_pending = True
+                battery_state = new_battery_state
 
-        log = log + f', battery: {value_v:.2f} {battery_state}%'
+                if config.getboolean('Detection', 'ADCShutdown'):
+                    if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
+                        shutdown(False)
+                        shutdown_pending = False
+                    elif value_v < config.getfloat("Detection", "VMinDischarging"):
+                        shutdown(True)
+                        shutdown_pending = True
 
-    # Wifi Icon
-    if config.getboolean('Detection', 'Wifi'):
-        count += 1
-        (new_wifi_state, wifi_quality) = wifi.get_state()
-        if new_wifi_state != wifi_state or new_ingame != ingame:
-            kill_overlay_process("wifi")
-            cmd = pngview_call(x_pos(count), Y_POS, icons[new_wifi_state], alpha)
-            overlay_processes["wifi"] = subprocess.Popen(cmd)
-            wifi_state = new_wifi_state
-        log = log + f', wifi: {wifi_state} {wifi_quality}%'
+            log = log + f', battery: {value_v:.2f} {battery_state}%'
 
-    # Bluetooth Icon
-    if config.getboolean('Detection', 'Bluetooth'):
-        count += 1
-        new_bt_state = bluetooth.get_state()
-        if new_bt_state != bt_state or new_ingame != ingame:
-            kill_overlay_process("bt")
-            cmd = pngview_call(x_pos(count), Y_POS, icons[new_bt_state], alpha)
-            overlay_processes["bt"] = subprocess.Popen(cmd)
-            bt_state = new_bt_state
-        log = log + f', bt: {bt_state}'
+        # Wifi Icon
+        if config.getboolean('Detection', 'Wifi'):
+            count += 1
+            (new_wifi_state, wifi_quality) = wifi.get_state()
+            if new_wifi_state != wifi_state or new_ingame != ingame:
+                kill_overlay_process("wifi")
+                cmd = pngview_call(x_pos(count), Y_POS, icons[new_wifi_state], alpha)
+                overlay_processes["wifi"] = subprocess.Popen(cmd)
+                wifi_state = new_wifi_state
+            log = log + f', wifi: {wifi_state} {wifi_quality}%'
 
-    # Audio Icon
-    if config.getboolean('Detection', 'Audio'):
-        count += 1
-        (new_audio_state, audio_volume) = audio.get_state()
-        if new_audio_state != audio_state or new_ingame != ingame:
-            kill_overlay_process("audio")
-            cmd = pngview_call(x_pos(count), Y_POS, icons[new_audio_state], alpha)
-            overlay_processes["audio"] = subprocess.Popen(cmd)
-            audio_state = new_audio_state
-        log = log + f', Audio: {audio_state} {audio_volume}%'
+        # Bluetooth Icon
+        if config.getboolean('Detection', 'Bluetooth'):
+            count += 1
+            new_bt_state = bluetooth.get_state()
+            if new_bt_state != bt_state or new_ingame != ingame:
+                kill_overlay_process("bt")
+                cmd = pngview_call(x_pos(count), Y_POS, icons[new_bt_state], alpha)
+                overlay_processes["bt"] = subprocess.Popen(cmd)
+                bt_state = new_bt_state
+            log = log + f', bt: {bt_state}'
 
-    # Enviroment Icons
-    if not config.getboolean('Detection', 'HideEnvWarnings'):
-        env = environment()
-        env_text = 'normal'
-        for key, value in env.items():
-            if value:
-                env_text = key
-                if not key in overlay_processes:
-                    count += 1
-                    cmd = pngview_call(x_pos(count), Y_POS, icons[key], alpha)
-                    overlay_processes[key] = subprocess.Popen(cmd)
-            elif not value:
-                kill_overlay_process(key)
-        log = log + f', environment: {env_text}'
+        # Audio Icon
+        if config.getboolean('Detection', 'Audio'):
+            count += 1
+            (new_audio_state, audio_volume) = audio.get_state()
+            if new_audio_state != audio_state or new_ingame != ingame:
+                kill_overlay_process("audio")
+                cmd = pngview_call(x_pos(count), Y_POS, icons[new_audio_state], alpha)
+                overlay_processes["audio"] = subprocess.Popen(cmd)
+                audio_state = new_audio_state
+            log = log + f', Audio: {audio_state} {audio_volume}%'
 
-    my_logger.info(log)
-    ingame = new_ingame
-    time.sleep(5)
+        # Enviroment Icons
+        if not config.getboolean('Detection', 'HideEnvWarnings'):
+            env = environment()
+            env_text = 'normal'
+            for key, value in env.items():
+                if value:
+                    env_text = key
+                    if not key in overlay_processes:
+                        count += 1
+                        cmd = pngview_call(x_pos(count), Y_POS, icons[key], alpha)
+                        overlay_processes[key] = subprocess.Popen(cmd)
+                elif not value:
+                    kill_overlay_process(key)
+            log = log + f', environment: {env_text}'
+
+        my_logger.info(log)
+        ingame = new_ingame
+        time.sleep(5)
+
+if __name__ == "__main__":
+    main()
