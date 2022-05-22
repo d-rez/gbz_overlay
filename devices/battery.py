@@ -19,21 +19,6 @@ def add_icons(icons, iconpath):
     """Add battery specific icons."""
     icons['battery_critical_shutdown'] = iconpath + "battery-alert_120.png"
 
-def translate_bat(voltage, vmax, vmin):
-    """Get correct battery state given battery voltage and voltage ranges."""
-    # determine if charging or discharging
-    state = 'discharging' if voltage <= vmax['discharging'] else 'charging'
-
-    # Figure out how 'wide' each range is
-    voltage_span = vmax[state] - vmin[state]
-    state_span = len(bat_icons[state]) - 1
-
-    # Convert the voltage into a 0-1 range (float)
-    value_scaled = max(float(voltage - vmin[state]) / float(voltage_span), 0)
-
-    # Convert the scaled value into the correct state
-    return bat_icons[state][int(round(value_scaled * state_span))]
-
 class Battery:
     """A Class to represent a battery and ADC device."""
     def __init__(self, config):
@@ -49,6 +34,21 @@ class Battery:
         self.adc_channel = config.getint("Detection", "ADCChannel")
         self.adc_gain = config.getfloat("Detection", "ADCGain")
 
+    def translate(self, voltage):
+        """Get correct battery state given battery voltage."""
+        # determine if charging or discharging
+        state = 'discharging' if voltage <= self.vmax['discharging'] else 'charging'
+
+        # Figure out how 'wide' each range is
+        voltage_span = self.vmax[state] - self.vmin[state]
+        state_span = len(bat_icons[state]) - 1
+
+        # Convert the voltage into a 0-1 range (float)
+        value_scaled = max(float(voltage - self.vmin[state]) / float(voltage_span), 0)
+
+        # Convert the scaled value into the correct state
+        return bat_icons[state][int(round(value_scaled * state_span))]
+
     def get_state(self):
         """Get state of battery device."""
         value_v = self.adc.read(self.adc_channel) * self.adc_gain
@@ -56,8 +56,9 @@ class Battery:
         self.battery_history.append(value_v)
         median_v = median(self.battery_history)
         try:
-            battery_state = translate_bat(median_v, self.vmax, self.vmin)
+            battery_state = self.translate(median_v)
         except IndexError:
             battery_state = "alert_red"
 
         return (battery_state, median_v)
+
