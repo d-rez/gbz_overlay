@@ -125,18 +125,19 @@ def interrupt_shutdown(channel):
             else:
                 my_logger.info("Shutdown button pressed, but not long enough to trigger Shutdown.")
 
-def shutdown(low_voltage):
-    """Shutdown system if low voltage, otherwise abort shutdown."""
-    if low_voltage:
-        my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
-        x_pos = int(resolution[0]) / 2 - 60
-        y_pos = int(resolution[1]) / 2 - 60
-        pngview("caution", x_pos, y_pos, icons["battery_critical_shutdown"])
-        os.system("sudo shutdown -P +1")
-    else:
-        os.system("sudo shutdown -c")
-        kill_overlay_process("caution")
-        my_logger.info("Power Restored, shutdown aborted.")
+def shutdown():
+    """Shutdown system in 60 seconds."""
+    my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
+    x_pos = int(resolution[0]) / 2 - 60
+    y_pos = int(resolution[1]) / 2 - 60
+    pngview("caution", x_pos, y_pos, icons["battery_critical_shutdown"])
+    os.system("sudo shutdown -P +1")
+
+def abort_shutdown():
+    """Abort pending shutdown."""
+    os.system("sudo shutdown -c")
+    kill_overlay_process("caution")
+    my_logger.info("Power Restored, shutdown aborted.")
 
 GPIO.setmode(GPIO.BCM)
 if config.getboolean('Detection', 'BatteryLDO'):
@@ -156,22 +157,17 @@ overlay_processes = {}
 if config.getboolean('Detection', 'BatteryADC'):
     bat = battery.Battery(config)
 
-def main():
+def main(): # pylint: disable=too-many-locals, too-many-branches, too-many-statements
     """ Main Function."""
-    wifi_state = None
-    bt_state = None
-    audio_state = None
-    battery_state = None
-    ingame = None
+    states = {"wifi": None, "bt": None, "bat": None, "audio": None, "ingame": None}
     shutdown_pending = False
 
     # Main Loop
     while True:
         count = 0
 
-        # Check if retroarch is running
+        # Check if retroarch is running then set alpha
         new_ingame = check_process('retroarch')
-
         if new_ingame:
             alpha = config['Detection']['InGameAlpha']
         else:
@@ -184,50 +180,50 @@ def main():
             count += 1
             (new_battery_state, value_v) = bat.get_state()
 
-            if new_battery_state != battery_state or new_ingame != ingame:
+            if new_battery_state != states["bat"] or new_ingame != states["ingame"]:
                 bat_icon_path = (ICON_PATH + "ic_battery_" + new_battery_state +
                                 "_black_" + ICON_SIZE + "dp.png")
                 if new_battery_state == "alert_red":
                     bat_icon_path = ICON_PATH + "battery-alert_" + ICON_SIZE + ".png"
                 pngview("bat", get_x_pos(count), Y_POS, bat_icon_path, alpha)
-                battery_state = new_battery_state
+                states["bat"] = new_battery_state
 
                 if config.getboolean('Detection', 'ADCShutdown'):
                     if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
-                        shutdown(False)
+                        abort_shutdown()
                         shutdown_pending = False
                     elif value_v < config.getfloat("Detection", "VMinDischarging"):
-                        shutdown(True)
+                        shutdown()
                         shutdown_pending = True
 
-            log = log + f', battery: {value_v:.2f} {battery_state}%'
+            log = log + f', battery: {value_v:.2f} {states["bat"]}%'
 
         # Wifi Icon
         if config.getboolean('Detection', 'Wifi'):
             count += 1
             (new_wifi_state, wifi_quality) = wifi.get_state()
-            if new_wifi_state != wifi_state or new_ingame != ingame:
+            if new_wifi_state != states["wifi"] or new_ingame != states["ingame"]:
                 pngview("wifi", get_x_pos(count), Y_POS, icons[new_wifi_state], alpha)
-                wifi_state = new_wifi_state
-            log = log + f', wifi: {wifi_state} {wifi_quality}%'
+                states["wifi"] = new_wifi_state
+            log = log + f', wifi: {states["wifi"]} {wifi_quality}%'
 
         # Bluetooth Icon
         if config.getboolean('Detection', 'Bluetooth'):
             count += 1
             new_bt_state = bluetooth.get_state()
-            if new_bt_state != bt_state or new_ingame != ingame:
+            if new_bt_state != states["bt"] or new_ingame != states["ingame"]:
                 pngview("bt", get_x_pos(count), Y_POS, icons[new_bt_state], alpha)
-                bt_state = new_bt_state
-            log = log + f', bt: {bt_state}'
+                states["bt"] = new_bt_state
+            log = log + f', bt: {states["bt"]}'
 
         # Audio Icon
         if config.getboolean('Detection', 'Audio'):
             count += 1
             (new_audio_state, audio_volume) = audio.get_state()
-            if new_audio_state != audio_state or new_ingame != ingame:
+            if new_audio_state != states["audio"] or new_ingame != states["ingame"]:
                 pngview("audio", get_x_pos(count), Y_POS, icons[new_audio_state], alpha)
-                audio_state = new_audio_state
-            log = log + f', Audio: {audio_state} {audio_volume}%'
+                states["audio"] = new_audio_state
+            log = log + f', Audio: {states["audio"]} {audio_volume}%'
 
         # Enviroment Icons
         if not config.getboolean('Detection', 'HideEnvWarnings'):
@@ -244,7 +240,7 @@ def main():
             log = log + f', environment: {env_text}'
 
         my_logger.info(log)
-        ingame = new_ingame
+        states["ingame"] = new_ingame
         time.sleep(5)
 
 if __name__ == "__main__":
