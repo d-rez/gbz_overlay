@@ -52,13 +52,13 @@ Y_POS = ICON_PADDING
 if config['Icons']['Vertical'] == "bottom":
     Y_POS = str(int(resolution[1]) - int(ICON_SIZE) - int(ICON_PADDING))
 
-def pngview_call(x, y, icon, alpha=255):
+def pngview_call(x_pos, y_pos, icon_path, alpha=255):
     """Return an array used to call pngview from binary location."""
     call = [PNGVIEW_PATH, "-d", "0", "-b", "0x0000",
-            "-n", "-l", "15000", "-y", str(y), "-x", str(x)]
+            "-n", "-l", "15000", "-y", str(y_pos), "-x", str(x_pos)]
     if int(alpha) < 255:
         call += ["-a", str(alpha)]
-    call += [icon]
+    call += [icon_path]
 
     return call
 
@@ -74,7 +74,7 @@ battery.add_icons(icons, ICON_PATH)
 
 ENV_CMD = "vcgencmd get_throttled"
 
-def x_pos(count):
+def get_x_pos(count):
     """Return x position for next icon based on number or icons already displayed."""
     if config['Icons']['Horizontal'] == "right":
         return int(resolution[0]) - (int(ICON_SIZE) + int(ICON_PADDING)) * count
@@ -130,9 +130,9 @@ def shutdown(low_voltage):
     kill_overlay_process("caution")
     if low_voltage:
         my_logger.warning("Low Battery. Initiating shutdown in 60 seconds.")
-        x = int(resolution[0]) / 2 - 60
-        y = int(resolution[1]) / 2 - 60
-        cmd = pngview_call(x, y, icons["battery_critical_shutdown"])
+        x_pos = int(resolution[0]) / 2 - 60
+        y_pos = int(resolution[1]) / 2 - 60
+        cmd = pngview_call(x_pos, y_pos, icons["battery_critical_shutdown"])
         overlay_processes["caution"] = subprocess.Popen(cmd)
         os.system("sudo shutdown -P +1")
     else:
@@ -192,7 +192,7 @@ def main():
                                 "_black_" + ICON_SIZE + "dp.png")
                 if new_battery_state == "alert_red":
                     bat_icon_path = ICON_PATH + "battery-alert_" + ICON_SIZE + ".png"
-                cmd = pngview_call(x_pos(count), Y_POS, bat_icon_path, alpha)
+                cmd = pngview_call(get_x_pos(count), Y_POS, bat_icon_path, alpha)
                 overlay_processes["bat"] = subprocess.Popen(cmd)
 
                 battery_state = new_battery_state
@@ -213,7 +213,7 @@ def main():
             (new_wifi_state, wifi_quality) = wifi.get_state()
             if new_wifi_state != wifi_state or new_ingame != ingame:
                 kill_overlay_process("wifi")
-                cmd = pngview_call(x_pos(count), Y_POS, icons[new_wifi_state], alpha)
+                cmd = pngview_call(get_x_pos(count), Y_POS, icons[new_wifi_state], alpha)
                 overlay_processes["wifi"] = subprocess.Popen(cmd)
                 wifi_state = new_wifi_state
             log = log + f', wifi: {wifi_state} {wifi_quality}%'
@@ -224,7 +224,7 @@ def main():
             new_bt_state = bluetooth.get_state()
             if new_bt_state != bt_state or new_ingame != ingame:
                 kill_overlay_process("bt")
-                cmd = pngview_call(x_pos(count), Y_POS, icons[new_bt_state], alpha)
+                cmd = pngview_call(get_x_pos(count), Y_POS, icons[new_bt_state], alpha)
                 overlay_processes["bt"] = subprocess.Popen(cmd)
                 bt_state = new_bt_state
             log = log + f', bt: {bt_state}'
@@ -235,7 +235,7 @@ def main():
             (new_audio_state, audio_volume) = audio.get_state()
             if new_audio_state != audio_state or new_ingame != ingame:
                 kill_overlay_process("audio")
-                cmd = pngview_call(x_pos(count), Y_POS, icons[new_audio_state], alpha)
+                cmd = pngview_call(get_x_pos(count), Y_POS, icons[new_audio_state], alpha)
                 overlay_processes["audio"] = subprocess.Popen(cmd)
                 audio_state = new_audio_state
             log = log + f', Audio: {audio_state} {audio_volume}%'
@@ -249,7 +249,7 @@ def main():
                     env_text = key
                     if not key in overlay_processes:
                         count += 1
-                        cmd = pngview_call(x_pos(count), Y_POS, icons[key], alpha)
+                        cmd = pngview_call(get_x_pos(count), Y_POS, icons[key], alpha)
                         overlay_processes[key] = subprocess.Popen(cmd)
                 elif not value:
                     kill_overlay_process(key)
