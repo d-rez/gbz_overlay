@@ -8,17 +8,23 @@ This repository contains a script to display status icons on top of your RetroPi
 ![Bluetooth, wifi connected, audio on](_images/240_icons.png)
 
 ## Features
-- display battery level (Requires appropiate Hardware, currently supports GPIO Low Voltage, MCP and ADS1 chips)
-- display WiFi state (connected/disconnected/disabled)
-- display Bluetooth state (connected/disconnected/disabled)
-- display under-voltage state
-- display warning if frequency-capped
-- display warning if throttling
+- display battery level (Requires appropiate Hardware)
+- display WiFi state
+- display Bluetooth state
+- display Audio state
+- display warning if under voltage, frequency-capped or throttling
 - gracefully shut down the Pi after 60s from when voltage goes below 3.2V of low voltage detected (abort shutdown when power is restored)
 - show a big imminent shutdown warning when the counter starts ticking
 - Set icon transparency while in game
 - Shutdown from button press
 - Custom icon colours
+
+## Battery Level Detection Support
+- Low Voltage GPIO
+- Texas Instruments ADS1015 (Also available as Adafruit breakout board)
+- Microchip MCP3008
+- PiJuice HAT / PiJuice Zero
+- Simple plugin system to add your own ADC / Battery monitor
 
 ## More Screenshots
 ![Overlay on TFT theme at 240p](_images/240_allicons.png)  
