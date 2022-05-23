@@ -1,7 +1,7 @@
 # RetroPie Status Overlay
 Based on [gbz_overlay](https://github.com/d-rez/gbz_overlay) script by [d-rez](https://github.com/d-rez)
 
-![example workflow](https://github.com/bverc/retropie-status-overlay/actions/workflows/pylint.yml/badge.svg?branch=delint)
+![example workflow](https://github.com/bverc/retropie-status-overlay/actions/workflows/pylint.yml/badge.svg)
 
 This repository contains a script to display status icons on top of your RetroPie games and emulationstation menus
 
