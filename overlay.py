@@ -113,9 +113,9 @@ def interrupt_shutdown(channel):
     """Shutdown system if interrupt activated."""
     if channel == int(config['BatteryLDO']['GPIO']):
         if GPIO.input(channel) != config.getboolean('BatteryLDO', 'ActiveLow'):
-            shutdown(True)
+            shutdown()
         else:
-            shutdown(False)
+            abort_shutdown()
     elif channel == int(config['ShutdownGPIO']['GPIO']):
         if GPIO.input(channel) != config.getboolean('ShutdownGPIO', 'ActiveLow'):
             time.sleep(1)
