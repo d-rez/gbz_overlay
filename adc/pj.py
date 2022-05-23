@@ -13,7 +13,7 @@ or apt-get install pijuice-base
 """
 
 # Import pijuice module
-from pijuice import PiJuice
+from pijuice import PiJuice # pylint: import-error; GitHub Actions unable to import this lib
 
 pijuice = PiJuice(1, 0x14) # Instantiate PiJuice interface object
 
