@@ -19,10 +19,10 @@ def get_state():
     """Get state of Bluetooth device."""
     bt_state = "bt_disabled"
     try:
-        p1 = subprocess.Popen('hciconfig', stdout=subprocess.PIPE)
-        cmd = ['awk', 'FNR == 3 {print tolower($1)}']
-        p2 = subprocess.Popen(cmd, stdin=p1.stdout, stdout=subprocess.PIPE)
-        state = p2.communicate()[0].decode().rstrip()
+        with subprocess.Popen('hciconfig', stdout=subprocess.PIPE) as proc1:
+            cmd = ['awk', 'FNR == 3 {print tolower($1)}']
+            with subprocess.Popen(cmd, stdin=proc1.stdout, stdout=subprocess.PIPE) as proc2:
+                state = proc2.communicate()[0].decode().rstrip()
         if state == "up":
             bt_state = "bt_enabled"
     except IOError:

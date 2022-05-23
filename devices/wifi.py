@@ -27,32 +27,30 @@ def get_state():
     wifi_state = "wifi_off"
     wifi_quality = 0
     try:
-        file = open(WIFI_CARRIER, "r", encoding="utf-8")
-        carrier_state = int(file.read().rstrip())
-        file.close()
+        with open(WIFI_CARRIER, "r", encoding="utf-8") as file:
+            carrier_state = int(file.read().rstrip())
         if carrier_state == 1:
             # ifup and connected to AP
             wifi_state = "wifi_4"
             # get wifi quality
-            cmd = subprocess.Popen(["iwconfig", "wlan0"], stdout=subprocess.PIPE)
-            for line in cmd.stdout:
-                if b'Link Quality' in line:
-                    x = line.split()[1].split(b"=")[1].split(b"/")
-                    wifi_quality = int(100*int(x[0])/int(x[1]))
-                    if wifi_quality < 20:
-                        wifi_state = "wifi_0"
-                    elif wifi_quality < 40:
-                        wifi_state = "wifi_1"
-                    elif wifi_quality < 60:
-                        wifi_state = "wifi_2"
-                    elif wifi_quality < 80:
-                        wifi_state = "wifi_3"
-                    else:
-                        wifi_state = "wifi_4"
+            with subprocess.Popen(["iwconfig", "wlan0"], stdout=subprocess.PIPE) as proc:
+                for line in proc.stdout:
+                    if b'Link Quality' in line:
+                        fraction = line.split()[1].split(b"=")[1].split(b"/")
+                        wifi_quality = int(100*int(fraction[0])/int(fraction[1]))
+                        if wifi_quality < 20:
+                            wifi_state = "wifi_0"
+                        elif wifi_quality < 40:
+                            wifi_state = "wifi_1"
+                        elif wifi_quality < 60:
+                            wifi_state = "wifi_2"
+                        elif wifi_quality < 80:
+                            wifi_state = "wifi_3"
+                        else:
+                            wifi_state = "wifi_4"
         elif carrier_state == 0:
-            file = open(WIFI_LINKMODE, "r", encoding="utf-8")
-            linkmode_state = int(file.read().rstrip())
-            file.close()
+            with open(WIFI_LINKMODE, "r", encoding="utf-8") as file:
+                linkmode_state = int(file.read().rstrip())
             if linkmode_state == 1:
                 # ifup but not connected to any network
                 wifi_state = "wifi_0"

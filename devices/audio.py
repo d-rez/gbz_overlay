@@ -17,18 +17,18 @@ def get_state():
     """Get state of audio device."""
     audio_state = "volume_mute"
     try:
-        cmd = subprocess.Popen('amixer', stdout=subprocess.PIPE)
-        for line in cmd.stdout:
-            if b'[' in line:
-                if line.split(b"[")[3].split(b"]")[0] == b"on":
-                    audio_volume = int(line.split(b"[")[1].split(b"%")[0])
-                    if audio_volume == 0:
-                        audio_state = "volume_0"
-                    elif audio_volume < 50:
-                        audio_state = "volume_1"
-                    else:
-                        audio_state = "volume_2"
-                break
+        with subprocess.Popen('amixer', stdout=subprocess.PIPE) as proc:
+            for line in proc.stdout:
+                if b'[' in line:
+                    if line.split(b"[")[3].split(b"]")[0] == b"on":
+                        audio_volume = int(line.split(b"[")[1].split(b"%")[0])
+                        if audio_volume == 0:
+                            audio_state = "volume_0"
+                        elif audio_volume < 50:
+                            audio_state = "volume_1"
+                        else:
+                            audio_state = "volume_2"
+                    break
 
     except IOError:
         pass
