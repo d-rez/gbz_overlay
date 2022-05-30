@@ -16,6 +16,7 @@ def add_icons(icons, iconpath, size):
 def get_state():
     """Get state of audio device."""
     audio_state = "volume_mute"
+    audio_volume = 0
     try:
         with subprocess.Popen('amixer', stdout=subprocess.PIPE) as proc:
             for line in proc.stdout:

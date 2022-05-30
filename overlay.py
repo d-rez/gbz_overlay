@@ -19,7 +19,11 @@ import configparser
 from datetime import datetime
 
 import psutil
-from RPi import GPIO
+try:
+    from RPi import GPIO
+except RuntimeError:
+    print("This module can only be run on a Raspberry Pi!")
+    print("Proceeding, as likely a unit test.")
 
 from devices import wifi, audio, bluetooth, battery
 
@@ -38,8 +42,11 @@ my_logger.addHandler(console)
 
 # Get Framebuffer resolution
 FB_FILE = "tvservice -s"
-FB_OUTPUT = subprocess.check_output(FB_FILE.split()).decode().rstrip()
-resolution = re.search(r"(\d{3,}x\d{3,})", FB_OUTPUT).group().split('x')
+try:
+    FB_OUTPUT = subprocess.check_output(FB_FILE.split()).decode().rstrip()
+    resolution = re.search(r"(\d{3,}x\d{3,})", FB_OUTPUT).group().split('x')
+except FileNotFoundError:
+    resolution = ['1920', '1080'] # Default to 1080p if unable to check
 my_logger.info(resolution)
 
 # Setup icons
@@ -139,19 +146,6 @@ def abort_shutdown():
     kill_overlay_process("caution")
     my_logger.info("Power Restored, shutdown aborted.")
 
-GPIO.setmode(GPIO.BCM)
-if config.getboolean('Detection', 'BatteryLDO'):
-    LDO_GPIO = config['BatteryLDO']['GPIO']
-    my_logger.info("LDO Active on GPIO %s", LDO_GPIO)
-    GPIO.setup(int(LDO_GPIO), GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(int(LDO_GPIO), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=500)
-
-if config.getboolean('Detection', 'ShutdownGPIO'):
-    SD_GPIO = config['ShutdownGPIO']['GPIO']
-    my_logger.info("Shutdown button on GPIO %s", SD_GPIO)
-    GPIO.setup(int(SD_GPIO), GPIO.IN, pull_up_down=GPIO.PUD_UP)
-    GPIO.add_event_detect(int(SD_GPIO), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=200)
-
 overlay_processes = {}
 
 if config.getboolean('Detection', 'BatteryADC'):
@@ -161,6 +155,19 @@ def main(): # pylint: disable=too-many-locals, too-many-branches, too-many-state
     """ Main Function."""
     states = {"wifi": None, "bt": None, "bat": None, "audio": None, "ingame": None}
     shutdown_pending = False
+
+    GPIO.setmode(GPIO.BCM)
+    if config.getboolean('Detection', 'BatteryLDO'):
+        ldo_gpio = config['BatteryLDO']['GPIO']
+        my_logger.info("LDO Active on GPIO %s", ldo_gpio)
+        GPIO.setup(int(ldo_gpio), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(int(ldo_gpio), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=500)
+
+    if config.getboolean('Detection', 'ShutdownGPIO'):
+        sd_gpio = config['ShutdownGPIO']['GPIO']
+        my_logger.info("Shutdown button on GPIO %s", sd_gpio)
+        GPIO.setup(int(sd_gpio), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+        GPIO.add_event_detect(int(sd_gpio), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=200)
 
     # Main Loop
     while True:

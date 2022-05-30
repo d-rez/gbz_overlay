@@ -14,7 +14,10 @@ I2C must be enabled via raspi-config
 import Adafruit_ADS1x15
 
 # Setup ADC
-adc = Adafruit_ADS1x15.ADS1015()
+try:
+    adc = Adafruit_ADS1x15.ADS1015()
+except RuntimeError:
+    pass
 
 def read(channel):
     """Read from ADC and return voltage."""

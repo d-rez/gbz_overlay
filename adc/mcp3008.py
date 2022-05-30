@@ -18,7 +18,10 @@ SPI_CS = 8
 SPI_MISO = 9
 SPI_MOSI = 10
 
-adc = Adafruit_MCP3008.MCP3008(clk=SPI_CLK, cs=SPI_CS, miso=SPI_MISO, mosi=SPI_MOSI)
+try:
+    adc = Adafruit_MCP3008.MCP3008(clk=SPI_CLK, cs=SPI_CS, miso=SPI_MISO, mosi=SPI_MOSI)
+except (TypeError, RuntimeError):
+    pass
 
 def read(channel):
     """Read from ADC and return voltage."""

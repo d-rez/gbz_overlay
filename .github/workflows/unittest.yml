@@ -1,4 +1,4 @@
-name: Pylint
+name: unittest
 
 on: [push]
 
@@ -17,9 +17,9 @@ jobs:
     - name: Install dependencies
       run: |
         python -m pip install --upgrade pip
-        pip install pylint
         pip install -r requirements.txt
         wget https://raw.githubusercontent.com/PiSupply/PiJuice/master/Software/Source/pijuice.py
-    - name: Analysing the code with pylint
+        cp config.ini.example config.ini
+    - name: Analysing the code with unittest
       run: |
-        pylint $(git ls-files '*.py')
+        python -m unittest

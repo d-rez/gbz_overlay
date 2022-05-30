@@ -104,3 +104,4 @@ ENV/
 config.ini
 colored_icons/
 raspidmx/
+pijuice.py
