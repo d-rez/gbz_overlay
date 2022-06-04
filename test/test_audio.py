@@ -25,11 +25,26 @@ class TestAudio(unittest.TestCase):
         self.assertTrue(icons['volume_mute'] == "random_dir/ic_volume_off_black_48dp.png")
 
     def test_get_state(self):
-        """Test audio.get_state()"""
-        # This will cause subprocess to call amixer, which could return anything
+        """Test audio.get_state() by overriding amixer with different volumes."""
+        audio.AUDIO_CMD = ["echo", "\n[100%] [0dB] [off]"]
         (audio_state, audio_volume) = audio.get_state()
-        self.assertTrue(audio_state in ("volume_0", "volume_1", "volume_2", "volume_mute"))
-        self.assertTrue(0 <= audio_volume <= 100)
+        self.assertTrue(audio_state == "volume_mute")
+        self.assertTrue(audio_volume == 100)
+
+        audio.AUDIO_CMD = ["echo", "\n\n[0%] [0dB] [on]"]
+        (audio_state, audio_volume) = audio.get_state()
+        self.assertTrue(audio_state == "volume_0")
+        self.assertTrue(audio_volume == 0)
+
+        audio.AUDIO_CMD = ["echo", "\n[49%] [0dB] [on]"]
+        (audio_state, audio_volume) = audio.get_state()
+        self.assertTrue(audio_state == "volume_1")
+        self.assertTrue(audio_volume == 49)
+
+        audio.AUDIO_CMD = ["echo", "\n[50%] [0dB] [on]"]
+        (audio_state, audio_volume) = audio.get_state()
+        self.assertTrue(audio_state == "volume_2")
+        self.assertTrue(audio_volume == 50)
 
 if __name__ == '__main__':
     unittest.main()

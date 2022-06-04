@@ -8,19 +8,25 @@ import importlib
 from statistics import median
 from collections import deque
 
-bat_icons = {"discharging": ["alert_red", "alert", "20", "30", "30", "50", "60",
+BAT_STATES = {"discharging": ["alert_red", "alert", "20", "30", "30", "50", "60",
                              "60", "80", "90", "full", "full"],
              "charging"   : ["charging_20", "charging_20", "charging_20",
                              "charging_30", "charging_30", "charging_50",
                              "charging_60", "charging_60", "charging_80",
                              "charging_90", "charging_full", "charging_full"]}
 
-def add_icons(icons, iconpath):
+def add_icons(icons, iconpath, size):
     """Add battery specific icons."""
+    for state in (BAT_STATES["discharging"] + BAT_STATES["charging"]):
+        icons[state] = iconpath + "ic_battery_" + state + "_black_" + size + "dp.png"
+    icons["alert_red"] = iconpath + "battery-alert_" + size + ".png"
     icons['battery_critical_shutdown'] = iconpath + "battery-alert_120.png"
 
 class Battery:
     """A Class to represent a battery and ADC device."""
+
+    NAME = "BatteryADC"
+
     def __init__(self, config):
         """Initialise battery object using config file for battery and ADC specifications."""
         self.adc = importlib.import_module('adc.' + config.get("Detection", "ADCType").lower())
@@ -41,13 +47,13 @@ class Battery:
 
         # Figure out how 'wide' each range is
         voltage_span = self.vmax[state] - self.vmin[state]
-        state_span = len(bat_icons[state]) - 1
+        state_span = len(BAT_STATES[state]) - 1
 
         # Convert the voltage into a 0-1 range (float)
         value_scaled = max(float(voltage - self.vmin[state]) / float(voltage_span), 0)
 
         # Convert the scaled value into the correct state
-        return bat_icons[state][int(round(value_scaled * state_span))]
+        return BAT_STATES[state][int(round(value_scaled * state_span))]
 
     def get_state(self):
         """Get state of battery device."""

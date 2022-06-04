@@ -6,6 +6,9 @@ Author: bverc
 
 import subprocess
 
+NAME = "Audio"
+AUDIO_CMD = "amixer"
+
 def add_icons(icons, iconpath, size):
     """Add audio specific icons."""
     icons['volume_0'] = iconpath + "ic_volume_mute_black_" + size + "dp.png"
@@ -18,11 +21,11 @@ def get_state():
     audio_state = "volume_mute"
     audio_volume = 0
     try:
-        with subprocess.Popen('amixer', stdout=subprocess.PIPE) as proc:
+        with subprocess.Popen(AUDIO_CMD, stdout=subprocess.PIPE) as proc:
             for line in proc.stdout:
                 if b'[' in line:
+                    audio_volume = int(line.split(b"[")[1].split(b"%")[0])
                     if line.split(b"[")[3].split(b"]")[0] == b"on":
-                        audio_volume = int(line.split(b"[")[1].split(b"%")[0])
                         if audio_volume == 0:
                             audio_state = "volume_0"
                         elif audio_volume < 50:
