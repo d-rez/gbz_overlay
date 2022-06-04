@@ -3,6 +3,7 @@ Based on [gbz_overlay](https://github.com/d-rez/gbz_overlay) script by [d-rez](h
 
 ![Pylint](https://github.com/bverc/retropie-status-overlay/actions/workflows/pylint.yml/badge.svg)
 ![unittest](https://github.com/bverc/retropie-status-overlay/actions/workflows/unittest.yml/badge.svg)
+[![Coverage Status](https://coveralls.io/repos/github/bverc/retropie-status-overlay/badge.svg)](https://coveralls.io/github/bverc/retropie-status-overlay)
 
 This repository contains a script to display status icons on top of your RetroPie games and emulationstation menus
 
