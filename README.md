@@ -27,6 +27,8 @@ This repository contains a script to display status icons on top of your RetroPi
 - PiJuice HAT / PiJuice Zero
 - Simple plugin system to add your own ADC / Battery monitor
 
+Read how to configure battery detection for your setup at [adc/README.md](https://github.com/bverc/retropie-status-overlay/tree/master/adc).
+
 ## More Screenshots
 ![Overlay on TFT theme at 240p](_images/240_allicons.png)  
 *Overlay on TFT theme at 240p*
