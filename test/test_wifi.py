@@ -47,12 +47,33 @@ class TestWifi(unittest.TestCase):
 
     def test_get_state_connected(self):
         """Test wifi.get_state() with CARRIER 1, check state is 'wifi_1/2/3/4'"""
-        # This will cause subprocess to call iwconfig, which could return anything
         cwd = os.getcwd()
         wifi.WIFI_CARRIER = cwd + "/test/dir2/file1"
+
+        wifi.WIFI_CMD = ["echo", "Link Quality=13/70"]
         (wifi_state, wifi_quality) = wifi.get_state()
-        self.assertTrue(wifi_state in ("wifi_0", "wifi_1", "wifi_2", "wifi_3", "wifi_4"))
-        self.assertTrue(0 <= wifi_quality <= 100)
+        self.assertTrue(wifi_state == "wifi_0")
+        self.assertTrue(wifi_quality == 18)
+
+        wifi.WIFI_CMD = ["echo", "Link Quality=27/70"]
+        (wifi_state, wifi_quality) = wifi.get_state()
+        self.assertTrue(wifi_state == "wifi_1")
+        self.assertTrue(wifi_quality == 38)
+
+        wifi.WIFI_CMD = ["echo", "Link Quality=41/70"]
+        (wifi_state, wifi_quality) = wifi.get_state()
+        self.assertTrue(wifi_state == "wifi_2")
+        self.assertTrue(wifi_quality == 58)
+
+        wifi.WIFI_CMD = ["echo", "Link Quality=55/70"]
+        (wifi_state, wifi_quality) = wifi.get_state()
+        self.assertTrue(wifi_state == "wifi_3")
+        self.assertTrue(wifi_quality == 78)
+
+        wifi.WIFI_CMD = ["echo", "Link Quality=70/70"]
+        (wifi_state, wifi_quality) = wifi.get_state()
+        self.assertTrue(wifi_state == "wifi_4")
+        self.assertTrue(wifi_quality == 100)
 
 if __name__ == '__main__':
     unittest.main()

@@ -74,10 +74,8 @@ icons = {
     "freq-capped": ICON_PATH + "thermometer_" + ICON_SIZE + ".png",
     "throttled": ICON_PATH + "thermometer-lines_" + ICON_SIZE + ".png",
 }
-wifi.add_icons(icons, ICON_PATH, ICON_SIZE)
-bluetooth.add_icons(icons, ICON_PATH, ICON_SIZE)
-audio.add_icons(icons, ICON_PATH, ICON_SIZE)
-battery.add_icons(icons, ICON_PATH)
+for module in [wifi, bluetooth, audio, battery]:
+    module.add_icons(icons, ICON_PATH, ICON_SIZE)
 
 ENV_CMD = "vcgencmd get_throttled"
 
@@ -146,104 +144,88 @@ def abort_shutdown():
     kill_overlay_process("caution")
     my_logger.info("Power Restored, shutdown aborted.")
 
+def adc_shutdown(shutdown_pending, voltage):
+    """Check if battery voltage should trigger a shutdown or recover a pending shutdown."""
+    if shutdown_pending and voltage > config.getfloat("Detection", "VMinCharging"):
+        abort_shutdown()
+        shutdown_pending = False
+    elif voltage < config.getfloat("Detection", "VMinDischarging"):
+        shutdown()
+        shutdown_pending = True
+    return shutdown_pending
+
+def get_alpha(ingame):
+    """Get alpha value if in game, otherwise max."""
+    if ingame:
+        return config['Detection']['InGameAlpha']
+    return "255"
+
+def setup_interrupts():
+    """setup interrupts for shutdown."""
+    GPIO.setmode(GPIO.BCM)
+    for interrupt in ['BatteryLDO', 'ShutdownGPIO']:
+        if config.getboolean('Detection', interrupt):
+            channel = config[interrupt]['GPIO']
+            my_logger.info("%s active on GPIO %s", interrupt, channel)
+            GPIO.setup(int(channel), GPIO.IN, pull_up_down=GPIO.PUD_UP)
+            GPIO.add_event_detect(int(channel), GPIO.BOTH, callback=interrupt_shutdown,
+                                  bouncetime=500)
+
+def update_device_icon(count, device, states, new_ingame, alpha):
+    """Check if device states hav changed; if so, update icons."""
+    (new_state, info) = device.get_state()
+    if new_state != states[device.NAME] or new_ingame != states["ingame"]:
+        pngview(device.NAME, get_x_pos(count), Y_POS, icons[new_state], alpha)
+        states[device.NAME] = new_state
+    return info
+
+def update_env_icons(count, alpha):
+    """Check environment status, and display any relevant icons."""
+    env = environment()
+    env_text = 'normal'
+    for key, value in env.items():
+        if value:
+            env_text = key
+            if not key in overlay_processes:
+                count += 1
+                pngview(key, get_x_pos(count), Y_POS, icons[key], alpha)
+        else:
+            kill_overlay_process(key)
+    return env_text
+
 overlay_processes = {}
 
-if config.getboolean('Detection', 'BatteryADC'):
-    bat = battery.Battery(config)
-
-def main(): # pylint: disable=too-many-locals, too-many-branches, too-many-statements
+def main():
     """ Main Function."""
-    states = {"wifi": None, "bt": None, "bat": None, "audio": None, "ingame": None}
+    states = {"Wifi": None, "Bluetooth": None, "Audio": None, "BatteryADC": None, "ingame": None}
+    devices = [wifi, bluetooth, audio]
+    if config.getboolean('Detection', 'BatteryADC'):
+        bat = battery.Battery(config)
+        devices.append(bat)
     shutdown_pending = False
-
-    GPIO.setmode(GPIO.BCM)
-    if config.getboolean('Detection', 'BatteryLDO'):
-        ldo_gpio = config['BatteryLDO']['GPIO']
-        my_logger.info("LDO Active on GPIO %s", ldo_gpio)
-        GPIO.setup(int(ldo_gpio), GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(int(ldo_gpio), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=500)
-
-    if config.getboolean('Detection', 'ShutdownGPIO'):
-        sd_gpio = config['ShutdownGPIO']['GPIO']
-        my_logger.info("Shutdown button on GPIO %s", sd_gpio)
-        GPIO.setup(int(sd_gpio), GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(int(sd_gpio), GPIO.BOTH, callback=interrupt_shutdown, bouncetime=200)
+    setup_interrupts()
 
     # Main Loop
     while True:
         count = 0
+        log = str(datetime.now())
 
         # Check if retroarch is running then set alpha
         new_ingame = check_process('retroarch')
-        if new_ingame:
-            alpha = config['Detection']['InGameAlpha']
-        else:
-            alpha = "255"
+        alpha = get_alpha(new_ingame)
 
-        log = str(datetime.now())
-
-        # Battery Icon
-        if config.getboolean('Detection', 'BatteryADC'):
-            count += 1
-            (new_battery_state, value_v) = bat.get_state()
-
-            if new_battery_state != states["bat"] or new_ingame != states["ingame"]:
-                bat_icon_path = (ICON_PATH + "ic_battery_" + new_battery_state +
-                                "_black_" + ICON_SIZE + "dp.png")
-                if new_battery_state == "alert_red":
-                    bat_icon_path = ICON_PATH + "battery-alert_" + ICON_SIZE + ".png"
-                pngview("bat", get_x_pos(count), Y_POS, bat_icon_path, alpha)
-                states["bat"] = new_battery_state
-
-                if config.getboolean('Detection', 'ADCShutdown'):
-                    if shutdown_pending and value_v > config.getfloat("Detection", "VMinCharging"):
-                        abort_shutdown()
-                        shutdown_pending = False
-                    elif value_v < config.getfloat("Detection", "VMinDischarging"):
-                        shutdown()
-                        shutdown_pending = True
-
-            log = log + f', battery: {value_v:.2f} {states["bat"]}%'
-
-        # Wifi Icon
-        if config.getboolean('Detection', 'Wifi'):
-            count += 1
-            (new_wifi_state, wifi_quality) = wifi.get_state()
-            if new_wifi_state != states["wifi"] or new_ingame != states["ingame"]:
-                pngview("wifi", get_x_pos(count), Y_POS, icons[new_wifi_state], alpha)
-                states["wifi"] = new_wifi_state
-            log = log + f', wifi: {states["wifi"]} {wifi_quality}%'
-
-        # Bluetooth Icon
-        if config.getboolean('Detection', 'Bluetooth'):
-            count += 1
-            new_bt_state = bluetooth.get_state()
-            if new_bt_state != states["bt"] or new_ingame != states["ingame"]:
-                pngview("bt", get_x_pos(count), Y_POS, icons[new_bt_state], alpha)
-                states["bt"] = new_bt_state
-            log = log + f', bt: {states["bt"]}'
-
-        # Audio Icon
-        if config.getboolean('Detection', 'Audio'):
-            count += 1
-            (new_audio_state, audio_volume) = audio.get_state()
-            if new_audio_state != states["audio"] or new_ingame != states["ingame"]:
-                pngview("audio", get_x_pos(count), Y_POS, icons[new_audio_state], alpha)
-                states["audio"] = new_audio_state
-            log = log + f', Audio: {states["audio"]} {audio_volume}%'
+        # Device Icons
+        for device in devices:
+            if config.getboolean('Detection', device.NAME):
+                count += 1
+                info = update_device_icon(count, device, states, new_ingame, alpha)
+                log = log + f', {device.NAME}: {states[device.NAME]} {info}'
+                if device.NAME == "BatteryADC" and config.getboolean('Detection', 'ADCShutdown'):
+                    shutdown_pending = adc_shutdown(shutdown_pending, info)
 
         # Enviroment Icons
         if not config.getboolean('Detection', 'HideEnvWarnings'):
-            env = environment()
-            env_text = 'normal'
-            for key, value in env.items():
-                if value:
-                    env_text = key
-                    if not key in overlay_processes:
-                        count += 1
-                        pngview(key, get_x_pos(count), Y_POS, icons[key], alpha)
-                elif not value:
-                    kill_overlay_process(key)
+            env_text = update_env_icons(count, alpha)
             log = log + f', environment: {env_text}'
 
         my_logger.info(log)

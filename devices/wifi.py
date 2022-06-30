@@ -6,12 +6,14 @@ Authors: bverc, d-rez
 
 import subprocess
 
+NAME = "Wifi"
+WIFI_CMD = ["iwconfig", "wlan0"]
+
 # 1 when wifi connected, 0 when disconnected or ifdown
 WIFI_CARRIER = "/sys/class/net/wlan0/carrier"
 
 # 1 when ifup, 0 when ifdown
 WIFI_LINKMODE = "/sys/class/net/wlan0/link_mode"
-
 
 def add_icons(icons, iconpath, size):
     """Add WIFI specific icons."""
@@ -33,7 +35,7 @@ def get_state():
             # ifup and connected to AP
             wifi_state = "wifi_4"
             # get wifi quality
-            with subprocess.Popen(["iwconfig", "wlan0"], stdout=subprocess.PIPE) as proc:
+            with subprocess.Popen(WIFI_CMD, stdout=subprocess.PIPE) as proc:
                 for line in proc.stdout:
                     if b'Link Quality' in line:
                         fraction = line.split()[1].split(b"=")[1].split(b"/")
