@@ -148,7 +148,11 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "# Gain for ADC Voltage. Adjust if dividing voltage before ADC input" >> config.ini
   echo "ADCGain = 1.0" >> config.ini
   echo "" >> config.ini
-  
+
+  echo "# ADC Channel for ADCs which have multiple channels" >> config.ini
+  echo "ADCChannel = 0" >> config.ini
+  echo "" >> config.ini
+
   echo "# Change how your battery calculations are made, See Read Me" >> config.ini
   echo "VMaxDischarging = 3.95" >> config.ini
   echo "VMaxCharging = 4.5" >> config.ini
