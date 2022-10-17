@@ -125,62 +125,28 @@ if [[ $CONFIG = [bB] ]] ; then
   fi
   echo "BatteryADC = $BATADC" >> config.ini
   echo "" >> config.ini  
-  
+
+  CHIPTYPE="None"
   if [[ $BATADC = "True" ]] ; then
-    read -p "[MCP]3008 or  [ADS1]x15: " CHIPTYPE
+    read -p "[MCP]3008, [ADS]1015, [PJ] PiJuice (Zero): " CHIPTYPE
     if [[ $CHIPTYPE = "MCP" ]] ; then
-      CHIPTYPE="MCP"
-    elif [[ $CHIPTYPE = "ADS1" ]] ; then
-      CHIPTYPE="ADS1"
-    else
-      CHIPTYPE="None"
-    fi
-
-    if [[ $CHIPTYPE = "MCP" ]] ; then
-      echo "GPIO for CLK?"
-      read -p "GPIO : " CLK
-    else
-      CLK=0
-    fi
-
-    if [[ $CHIPTYPE = "MCP" ]] ; then
-      echo "GPIO for MISO?"
-      read -p "GPIO : " MISO
-    else
-      MISO=0
-    fi
-
-    if [[ $CHIPTYPE = "MCP" ]] ; then
-      echo "GPIO for MOSI?"
-      read -p "GPIO: " MOSI
-    else
-      MOSI=0
-    fi
-
-    if [[ $CHIPTYPE = "MCP" ]] ; then
-      echo "GPIO for CS?"
-      read -p "GPIO : " CS
-    else
-      CS=0
+      CHIPTYPE="MCP3008"
+    elif [[ $CHIPTYPE = "ADS" ]] ; then
+      CHIPTYPE="ADS1015"
+    elif [[ $CHIPTYPE = "PJ" ]] ; then
+      CHIPTYPE="PJ"
     fi
   fi
 
   echo "# Which chip are you using for ADC (Only applies if BatteryADC=True)" >> config.ini 
-  echo "# MCP  : MCP3008" >> config.ini
-  echo "# ADS1 : ADS1x15" >> config.ini
-  echo "Which hardware are you using for ADC?"
-  echo "Type = $CHIPTYPE" >> config.ini
-  echo "" >> config.ini
-  
-  echo "# If MCP what are you SPI Pins" >> config.ini
-  echo "clk = $CLK" >> config.ini
-  echo "miso = $MISO" >> config.ini
-  echo "mosi = $MOSI" >> config.ini
-  echo "cs = $CS" >> config.ini
+  echo "# MCP3008" >> config.ini
+  echo "# ADS1015" >> config.ini
+  echo "# PJ (PiJuice or PiJuice Zero)" >> config.ini
+  echo "ADCType = $CHIPTYPE" >> config.ini
   echo "" >> config.ini
 
-  echo "# Multiplier for ADC Number, See Read Me" >> config.ini
-  echo "Multiplier = 1" >> config.ini
+  echo "# Gain for ADC Voltage. Adjust if dividing voltage before ADC input" >> config.ini
+  echo "ADCGain = 1.0" >> config.ini
   echo "" >> config.ini
   
   echo "# Change how your battery calculations are made, See Read Me" >> config.ini
@@ -191,7 +157,7 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "" >> config.ini
   
   echo "# Should low ADC cause shutdown" >> config.ini
-  echo "ADCShutdown = N" >> config.ini
+  echo "ADCShutdown = False" >> config.ini
   echo "" >> config.ini
 
   echo "# Do you have a LDO GPIO Pin to Monitor Low Battery" >> config.ini
@@ -211,7 +177,6 @@ if [[ $CONFIG = [bB] ]] ; then
   echo "BatteryLDO = $BATLDO" >> config.ini
   echo "" >> config.ini
 
-  echo "# Do you have a GPIO Pin you wish to use for shutdown" >> config.ini
   echo "Enable Shutdown via GPIO? (Requires specific hardware)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
@@ -225,21 +190,21 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     SD="False"
   fi
-  
+
   echo "# Do you have a GPIO Pin you wish to use for shutdown" >> config.ini
   echo "ShutdownGPIO = $SD" >> config.ini
   echo "" >> config.ini
 
-  echo "# Transparency of icons in game" >> config.ini
   echo "Transparency of icons when in game"
-  while [[ "EOIG" -lt 0 || "$EOIG" -gt 255 ]]
+  EOIG=256
+  while [[ "$EOIG" -lt 0 || "$EOIG" -gt 255 ]]
   do
     read -p "0% - 100% [0-255] : " EOIG
   done
+  echo "# Transparency of icons in game" >> config.ini
   echo "InGameAlpha = $EOIG" >> config.ini
   echo "" >> config.ini
 
-  echo "# Hide Any Environment Warnings, such as temperature" >> config.ini
   echo "Hide Env Warnings (Low Voltage, Thermal Throttle etc)"
   read -p "[y]es or [N]o: " SD
   if [[ $SD = [yY] ]] ; then
@@ -247,6 +212,7 @@ if [[ $CONFIG = [bB] ]] ; then
   else
     HEW="False"
   fi
+  echo "# Hide Any Environment Warnings, such as temperature" >> config.ini
   echo "HideEnvWarnings = $HEW" >> config.ini
   echo "" >> config.ini
 
@@ -363,4 +329,4 @@ echo "sudo service retropie-status-overlay [stop|start]"
 echo ""
 echo "Use remove.sh at anytime to uninstall Retropie status overlay"
 echo ""
-echo "There a number of additional options to configure in your $SCRIPTPATH/config.ini file, see readme for more details"
+echo "There a number of additional options to configure in your config.ini file, see readme for more details"
