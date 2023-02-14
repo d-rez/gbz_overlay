@@ -26,6 +26,8 @@ This repository contains a script to display status icons on top of your RetroPi
 - Texas Instruments ADS1015 (Also available as Adafruit breakout board)
 - Microchip MCP3008
 - PiJuice HAT / PiJuice Zero
+- PiSugar ([requires testing](https://github.com/bverc/retropie-status-overlay/issues/22))
+- Serial interface (such as Arduino) ([requires testing](https://github.com/bverc/retropie-status-overlay/issues/32))
 - Simple plugin system to add your own ADC / Battery monitor
 
 Read how to configure battery detection for your setup at [adc/README.md](https://github.com/bverc/retropie-status-overlay/tree/master/adc).
